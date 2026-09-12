@@ -3,3 +3,4 @@ torchvision>=0.16
 pycountry>=23.12
 certifi
 pytest>=7.4
+scikit-learn>=1.3
