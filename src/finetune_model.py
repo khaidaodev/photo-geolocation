@@ -1,10 +1,11 @@
 """
 Fine-tuning pass on top of the frozen baseline, still just the 20 starter countries.
 
-The baseline kept ResNet18 completely frozen and only trained a logistic regression on top.
-This time the last block (layer4) plus a fresh final layer get unfrozen and trained directly
-on our photos. Most of the network stays general purpose, but the deeper end gets to adjust to
-our specific photos instead of staying fully generic.
+First attempt at this overfit badly, 99.3% training accuracy but only 13.0% validation
+accuracy, the model was just memorising the exact training photos rather than learning
+anything general. This version adds data augmentation: random crops, flips, and colour
+jitter applied only to training photos, so the model sees a slightly different version of
+each photo every pass and can't just memorise them.
 
 Run it with:
     python src/finetune_model.py
@@ -26,10 +27,24 @@ ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=ce
 ROOT = Path(__file__).resolve().parent.parent
 COUNTRY211_DIR = ROOT / "data" / "raw" / "country211"
 
-TRANSFORM = transforms.Compose([
+IMAGENET_MEAN = [0.485, 0.456, 0.406]
+IMAGENET_STD = [0.229, 0.224, 0.225]
+
+# Augmentation only for training: random crop/flip/colour changes so the model can't just
+# memorise the exact training photos.
+TRAIN_TRANSFORM = transforms.Compose([
+    transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),
+    transforms.RandomHorizontalFlip(),
+    transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0.2),
+    transforms.ToTensor(),
+    transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
+])
+
+# No augmentation for validation, we want to test on the real, unaltered photos.
+EVAL_TRANSFORM = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
-    transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+    transforms.Normalize(mean=IMAGENET_MEAN, std=IMAGENET_STD),
 ])
 
 
@@ -71,8 +86,8 @@ def run_epoch(model, loader, criterion, optimizer=None):
 
 if __name__ == "__main__":
     print("Loading train/valid splits (20 starter countries)...")
-    train_data = torchvision.datasets.ImageFolder(str(COUNTRY211_DIR / "train"), transform=TRANSFORM)
-    valid_data = torchvision.datasets.ImageFolder(str(COUNTRY211_DIR / "valid"), transform=TRANSFORM)
+    train_data = torchvision.datasets.ImageFolder(str(COUNTRY211_DIR / "train"), transform=TRAIN_TRANSFORM)
+    valid_data = torchvision.datasets.ImageFolder(str(COUNTRY211_DIR / "valid"), transform=EVAL_TRANSFORM)
 
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     valid_loader = DataLoader(valid_data, batch_size=32, shuffle=False)
@@ -89,4 +104,5 @@ if __name__ == "__main__":
         valid_loss, valid_acc = run_epoch(model, valid_loader, criterion)
         print(f"Epoch {epoch}/{epochs}: train acc {train_acc:.1%}, valid acc {valid_acc:.1%}")
 
+    print("Previous attempt without augmentation: 99.3% train, 13.0% valid (overfit).")
     print("Baseline (frozen, logistic regression) was 10.6% for comparison.")

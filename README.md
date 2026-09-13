@@ -11,8 +11,9 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, first baseline model's done, and a first fine-tuning attempt turned up a
-real overfitting problem worth fixing next, see "Results so far" below.
+Data pipeline's built, baseline model's done, and two fine-tuning attempts so far, one that
+overfit badly, one that fixed the overfitting but didn't yet improve real accuracy. See
+"Results so far" below for the honest breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -27,15 +28,16 @@ scales up once that's actually working.
 logistic regression trained on top guesses the country. 10.6% validation accuracy on the 20
 starter countries, vs 5% for random guessing.
 
-**Fine-tuning attempt:** unfroze the last block of the ResNet and trained it directly for 5
-passes over the training photos. Training accuracy hit 99.3%, but validation accuracy barely
-moved, 13.0%. That gap is overfitting, the model memorised details specific to the training
-photos instead of learning general patterns that transfer to new ones. With only 150 training
-photos per country, this is expected on a first pass rather than a bug.
+**Fine-tuning, attempt 1:** unfroze the last block of the ResNet and trained it directly for 5
+passes. Training accuracy hit 99.3%, but validation accuracy barely moved, 13.0%. Classic
+overfitting, the model memorised the exact training photos instead of learning anything general.
 
-Next real step is tackling the overfitting directly, most likely data augmentation (randomly
-flipping, cropping, or shifting the colours of training photos so the model can't just memorise
-them), a lower learning rate, or unfreezing fewer layers.
+**Fine-tuning, attempt 2 (with augmentation):** added random crops, flips, and colour jitter to
+the training photos only, so the model can't just memorise them. Training accuracy dropped to
+73.3% (harder training data, expected), and the train/valid gap shrank a lot. But validation
+accuracy still only reached 13.9%, barely above attempt 1. So this fixed the overfitting
+symptom, but hasn't yet turned into better real-world accuracy. Most likely needs more training
+epochs now that the data's genuinely harder to learn from, or a less aggressive augmentation.
 
 ## How to run this yourself
 
@@ -56,8 +58,8 @@ countries have been extracted.
 ## Testing and git
 
 `tests/` covers the bits that don't need the full dataset, country code lookups, folder
-scanning, and the fine-tuning model's layer-freezing logic. Will add more as the modelling side
-grows.
+scanning, and the fine-tuning model's layer-freezing and augmentation setup. Will add more as
+the modelling side grows.
 
 ## Tools used
 
@@ -68,4 +70,3 @@ Python, PyTorch/torchvision, scikit-learn, pycountry.
 [Country211](https://github.com/openai/CLIP/blob/main/data/country211.md), built by OpenAI from
 YFCC100M geotagged Flickr photos. Used here under the same terms, the photos themselves are
 whatever Creative Commons licence their original uploaders picked.
-
