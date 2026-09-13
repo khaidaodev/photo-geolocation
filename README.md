@@ -11,8 +11,8 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, and there's a first baseline model with real numbers below. Next step is
-beating that baseline, then scaling past 20 countries.
+Data pipeline's built, first baseline model's done, and a first fine-tuning attempt turned up a
+real overfitting problem worth fixing next, see "Results so far" below.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -23,13 +23,19 @@ scales up once that's actually working.
 
 ## Results so far
 
-First baseline: a frozen pretrained ResNet18 turns each photo into a 512-number summary, then a
-logistic regression trained on top guesses the country. Transfer learning, borrowing a model
-that already knows how to "see" instead of training one from scratch on a few thousand photos.
+**Baseline:** a frozen pretrained ResNet18 turns each photo into a 512-number summary, then a
+logistic regression trained on top guesses the country. 10.6% validation accuracy on the 20
+starter countries, vs 5% for random guessing.
 
-**10.6% validation accuracy** on the 20 starter countries, vs 5% for random guessing. Not
-amazing, but clearly picking up real signal, which is expected for a frozen model with zero
-fine-tuning. Next step is probably fine-tuning the network itself, or a stronger pretrained model.
+**Fine-tuning attempt:** unfroze the last block of the ResNet and trained it directly for 5
+passes over the training photos. Training accuracy hit 99.3%, but validation accuracy barely
+moved, 13.0%. That gap is overfitting, the model memorised details specific to the training
+photos instead of learning general patterns that transfer to new ones. With only 150 training
+photos per country, this is expected on a first pass rather than a bug.
+
+Next real step is tackling the overfitting directly, most likely data augmentation (randomly
+flipping, cropping, or shifting the colours of training photos so the model can't just memorise
+them), a lower learning rate, or unfreezing fewer layers.
 
 ## How to run this yourself
 
@@ -37,18 +43,21 @@ fine-tuning. Next step is probably fine-tuning the network itself, or a stronger
 pip3 install -r requirements.txt
 python3 src/data_loading.py
 python3 src/baseline_model.py
+python3 src/finetune_model.py
 ```
 
 First script downloads Country211 (~11GB, one-time). Worth only extracting the 20 starter
 countries at first, the archive stays on disk so extracting more later doesn't mean
 re-downloading.
 
-Second script trains and evaluates the baseline on whatever's been extracted.
+Second and third scripts train and evaluate the baseline and fine-tuned models on whatever
+countries have been extracted.
 
 ## Testing and git
 
-`tests/` covers the bits that don't need the full dataset, country code lookups and folder
-scanning mostly. Will add more as the modelling side grows.
+`tests/` covers the bits that don't need the full dataset, country code lookups, folder
+scanning, and the fine-tuning model's layer-freezing logic. Will add more as the modelling side
+grows.
 
 ## Tools used
 
