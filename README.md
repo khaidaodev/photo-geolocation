@@ -11,9 +11,9 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, and two fine-tuning attempts so far, one that
-overfit badly, one that fixed the overfitting but didn't yet improve real accuracy. See
-"Results so far" below for the honest breakdown.
+Data pipeline's built, baseline model's done, and three fine-tuning attempts so far, each one
+narrowing down what's actually going wrong rather than just guessing. See "Results so far" for
+the honest breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -28,16 +28,22 @@ scales up once that's actually working.
 logistic regression trained on top guesses the country. 10.6% validation accuracy on the 20
 starter countries, vs 5% for random guessing.
 
-**Fine-tuning, attempt 1:** unfroze the last block of the ResNet and trained it directly for 5
-passes. Training accuracy hit 99.3%, but validation accuracy barely moved, 13.0%. Classic
-overfitting, the model memorised the exact training photos instead of learning anything general.
+**Fine-tuning, attempt 1 (5 epochs, no augmentation):** unfroze the last block of the ResNet and
+trained it directly. Training accuracy hit 99.3%, but validation accuracy barely moved, 13.0%.
+Classic overfitting, the model memorised the exact training photos.
 
-**Fine-tuning, attempt 2 (with augmentation):** added random crops, flips, and colour jitter to
-the training photos only, so the model can't just memorise them. Training accuracy dropped to
-73.3% (harder training data, expected), and the train/valid gap shrank a lot. But validation
-accuracy still only reached 13.9%, barely above attempt 1. So this fixed the overfitting
-symptom, but hasn't yet turned into better real-world accuracy. Most likely needs more training
-epochs now that the data's genuinely harder to learn from, or a less aggressive augmentation.
+**Fine-tuning, attempt 2 (5 epochs, with augmentation):** added random crops, flips, and colour
+jitter to training photos only. Training accuracy dropped to 73.3% and the train/valid gap
+shrank a lot, but validation accuracy still only reached 13.9%.
+
+**Fine-tuning, attempt 3 (15 epochs, with augmentation):** trained for longer to see if the
+model just needed more time. Validation accuracy stayed basically flat the whole way through,
+12% to 13.6%, best at epoch 9. Training accuracy climbed back up past 99% by epoch 10 anyway,
+so given enough epochs the model eventually overfits regardless of augmentation. More training
+time alone isn't the fix.
+
+Next real step is probably unfreezing less of the network (just the final layer, or fewer
+ResNet blocks) or lowering the learning rate, rather than just training longer.
 
 ## How to run this yourself
 
@@ -58,8 +64,8 @@ countries have been extracted.
 ## Testing and git
 
 `tests/` covers the bits that don't need the full dataset, country code lookups, folder
-scanning, and the fine-tuning model's layer-freezing and augmentation setup. Will add more as
-the modelling side grows.
+scanning, and the fine-tuning model's layer-freezing, augmentation, and best-epoch logic. Will
+add more as the modelling side grows.
 
 ## Tools used
 

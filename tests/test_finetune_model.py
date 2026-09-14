@@ -1,6 +1,5 @@
 """
-Tests for finetune_model.py, checking layer freezing and that augmentation only applies to
-the training transform, not the evaluation one.
+Tests for finetune_model.py: layer freezing, augmentation setup, and best-epoch tracking.
 """
 
 import sys
@@ -40,3 +39,15 @@ def test_eval_transform_has_no_augmentation():
     assert transforms.RandomHorizontalFlip not in transform_types
     assert transforms.RandomResizedCrop not in transform_types
     assert transforms.ColorJitter not in transform_types
+
+
+def test_best_epoch_picks_highest_accuracy():
+    epoch_num, acc = finetune_model.best_epoch([0.10, 0.14, 0.12, 0.09])
+    assert epoch_num == 2
+    assert acc == 0.14
+
+
+def test_best_epoch_handles_last_epoch_being_best():
+    epoch_num, acc = finetune_model.best_epoch([0.10, 0.11, 0.15])
+    assert epoch_num == 3
+    assert acc == 0.15
