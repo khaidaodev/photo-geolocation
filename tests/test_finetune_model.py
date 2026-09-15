@@ -1,5 +1,6 @@
 """
-Tests for finetune_model.py: layer freezing, augmentation setup, and best-epoch tracking.
+Tests for finetune_model.py: layer freezing, augmentation setup, learning rate, and
+best-epoch tracking.
 """
 
 import sys
@@ -51,3 +52,7 @@ def test_best_epoch_handles_last_epoch_being_best():
     epoch_num, acc = finetune_model.best_epoch([0.10, 0.11, 0.15])
     assert epoch_num == 3
     assert acc == 0.15
+
+
+def test_learning_rate_is_lower_than_previous_attempt():
+    assert finetune_model.LEARNING_RATE == 1e-5

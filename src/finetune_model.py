@@ -1,11 +1,11 @@
 """
 Fine-tuning pass on top of the frozen baseline, still just the 20 starter countries.
 
-Attempt 1 overfit badly (99.3% train, 13.0% valid). Attempt 2 added data augmentation, which
-fixed the overfitting gap but only ran for 5 epochs, not really enough for the model to learn
-much from the now-harder, randomly-varied training photos. This attempt just trains for longer
-(15 epochs instead of 5) and keeps track of whichever epoch actually got the best validation
-accuracy, since with more epochs the last one isn't necessarily the best one anymore.
+Attempt 1 overfit badly (99.3% train, 13.0% valid). Attempt 2 added augmentation, fixing the
+overfitting gap short-term but valid accuracy stayed flat. Attempt 3 trained for longer (15
+epochs) and found the model eventually overfits anyway by epoch 10+, plateauing at 13.6% valid.
+This attempt lowers the learning rate 10x (from 1e-4 to 1e-5), so the unfrozen layer adjusts in
+smaller, more careful steps instead of big ones that let it overshoot into memorising too fast.
 
 Run it with:
     python src/finetune_model.py
@@ -29,6 +29,8 @@ COUNTRY211_DIR = ROOT / "data" / "raw" / "country211"
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
+
+LEARNING_RATE = 1e-5  # was 1e-4 in the previous attempt
 
 TRAIN_TRANSFORM = transforms.Compose([
     transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),
@@ -83,8 +85,7 @@ def run_epoch(model, loader, criterion, optimizer=None):
 
 def best_epoch(valid_accuracies: list[float]) -> tuple[int, float]:
     """Given a list of validation accuracies (one per epoch, in order), returns the 1-indexed
-    epoch number and accuracy of whichever epoch did best. Pulled out as its own function so
-    it can be tested without needing to actually train anything."""
+    epoch number and accuracy of whichever epoch did best."""
     best_index = max(range(len(valid_accuracies)), key=lambda i: valid_accuracies[i])
     return best_index + 1, valid_accuracies[best_index]
 
@@ -97,11 +98,11 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     valid_loader = DataLoader(valid_data, batch_size=32, shuffle=False)
 
-    print("Building model (ResNet18, last block unfrozen)...")
+    print(f"Building model (ResNet18, last block unfrozen, lr={LEARNING_RATE})...")
     model = build_model(num_classes=len(train_data.classes))
 
     criterion = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-4)
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=LEARNING_RATE)
 
     epochs = 15
     valid_accuracies = []
@@ -113,4 +114,4 @@ if __name__ == "__main__":
 
     epoch_num, best_acc = best_epoch(valid_accuracies)
     print(f"Best epoch: {epoch_num}/{epochs}, valid acc {best_acc:.1%}")
-    print("Previous attempt (5 epochs, augmented): 13.9% valid. Baseline: 10.6% valid.")
+    print("Previous attempt (lr=1e-4, 15 epochs): 13.6% valid. Baseline: 10.6% valid.")
