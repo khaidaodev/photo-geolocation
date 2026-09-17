@@ -11,8 +11,9 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, and four fine-tuning attempts so far, each one
-narrowing down what's actually going wrong. See "Results so far" for the honest breakdown.
+Data pipeline's built, baseline model's done, and five fine-tuning attempts so far, tracking
+down an overfitting problem step by step until it was properly understood. See "Results so far"
+for the full honest breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -31,21 +32,30 @@ random guessing.
 directly. 99.3% train accuracy, 13.0% valid, classic overfitting.
 
 **Fine-tuning, attempt 2 (5 epochs, with augmentation):** added random crops, flips, colour
-jitter to training photos. Train accuracy dropped to 73.3%, gap shrank, but valid accuracy still
-only 13.9%.
+jitter to training photos. Train accuracy dropped to 73.3%, gap shrank, valid stayed at 13.9%.
 
 **Fine-tuning, attempt 3 (15 epochs, with augmentation):** trained longer to see if it just
-needed time. Valid accuracy plateaued around 12-13.6% the whole way, and train accuracy climbed
-back past 99% by epoch 10, model eventually overfits regardless.
+needed time. Valid plateaued around 12-13.6%, train climbed back past 99% by epoch 10, model
+overfits regardless of augmentation given enough epochs.
 
-**Fine-tuning, attempt 4 (15 epochs, augmentation, learning rate lowered 10x to 1e-5):** train
-and valid accuracy climbed together the whole run for the first time, no overfitting gap at all.
-Best result yet, 13.9% valid at the final epoch, but still rising when training stopped, meaning
-15 epochs wasn't enough this time, the model was learning steadily but needed more time to reach
-its actual ceiling.
+**Fine-tuning, attempt 4 (15 epochs, learning rate lowered 10x to 1e-5):** train and valid
+climbed together for the first time, no overfitting gap, but still rising at epoch 15, 13.9%
+valid, meaning 15 epochs wasn't long enough to see where it actually levels off.
 
-Next real step is running this same setup for more epochs (maybe 30-40) to see where it actually
-levels off, now that the training curve itself looks healthy for the first time.
+**Fine-tuning, attempt 5 (35 epochs, same lower learning rate):** best result was epoch 13,
+13.7% valid. After that, valid accuracy drifted down into the 12% range and stayed there, while
+train accuracy kept climbing steadily to 79.9%. So the lower learning rate didn't remove
+overfitting, it just delayed it. The real ceiling for this exact setup (last block unfrozen,
+this augmentation, this learning rate) is around 13-14% valid accuracy, reached at epoch 13.
+
+The actual lesson from all five attempts: picking a fixed number of epochs in advance is the
+wrong approach here. What matters is stopping training the moment validation accuracy stops
+improving (early stopping), rather than guessing a number upfront and hoping it lands well.
+
+Next real step is either adding early stopping so training runs stop themselves at the right
+point automatically, or trying a different structural change, like unfreezing only the final
+layer instead of a whole ResNet block, since less of the network being trainable at once should
+mean less room to overfit in the first place.
 
 ## How to run this yourself
 
