@@ -1,11 +1,16 @@
 """
 Fine-tuning pass on top of the frozen baseline, still just the 20 starter countries.
 
-Attempt 1 overfit badly (99.3% train, 13.0% valid). Attempt 2 added augmentation, fixing the
-overfitting gap short-term but valid accuracy stayed flat. Attempt 3 trained for longer (15
-epochs) and found the model eventually overfits anyway by epoch 10+, plateauing at 13.6% valid.
-This attempt lowers the learning rate 10x (from 1e-4 to 1e-5), so the unfrozen layer adjusts in
-smaller, more careful steps instead of big ones that let it overshoot into memorising too fast.
+Five earlier attempts (documented in the README) tracked down an overfitting problem: given
+enough epochs, the model eventually starts memorising the training photos regardless of
+augmentation or a lower learning rate, it just takes longer to happen. Rather than guessing a
+fixed epoch count each time, this version adds early stopping: training stops itself once
+validation accuracy hasn't improved for a set number of epochs (patience), instead of running
+blindly for a fixed length and hoping it lands on a good spot.
+
+Patience is set to 8, based on attempt 5's real data, the best epoch there was 13, and it never
+beat that again in the following 22 epochs, so 8 epochs without improvement is a reasonable
+signal that training has plateaued.
 
 Run it with:
     python src/finetune_model.py
@@ -30,7 +35,9 @@ COUNTRY211_DIR = ROOT / "data" / "raw" / "country211"
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
-LEARNING_RATE = 1e-5  # was 1e-4 in the previous attempt
+LEARNING_RATE = 1e-5
+MAX_EPOCHS = 35
+PATIENCE = 8
 
 TRAIN_TRANSFORM = transforms.Compose([
     transforms.RandomResizedCrop(224, scale=(0.7, 1.0)),
@@ -90,6 +97,17 @@ def best_epoch(valid_accuracies: list[float]) -> tuple[int, float]:
     return best_index + 1, valid_accuracies[best_index]
 
 
+def should_stop_early(valid_accuracies: list[float], patience: int) -> bool:
+    """Returns True once it's been more than `patience` epochs since the best validation
+    accuracy seen so far, meaning training has plateaued and should stop rather than keep
+    running pointlessly (and risking more overfitting the longer it goes on)."""
+    if len(valid_accuracies) <= patience:
+        return False
+    epoch_num, _ = best_epoch(valid_accuracies)
+    epochs_since_best = len(valid_accuracies) - epoch_num
+    return epochs_since_best >= patience
+
+
 if __name__ == "__main__":
     print("Loading train/valid splits (20 starter countries)...")
     train_data = torchvision.datasets.ImageFolder(str(COUNTRY211_DIR / "train"), transform=TRAIN_TRANSFORM)
@@ -104,14 +122,17 @@ if __name__ == "__main__":
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=LEARNING_RATE)
 
-    epochs = 15
     valid_accuracies = []
-    for epoch in range(1, epochs + 1):
+    for epoch in range(1, MAX_EPOCHS + 1):
         train_loss, train_acc = run_epoch(model, train_loader, criterion, optimizer)
         valid_loss, valid_acc = run_epoch(model, valid_loader, criterion)
         valid_accuracies.append(valid_acc)
-        print(f"Epoch {epoch}/{epochs}: train acc {train_acc:.1%}, valid acc {valid_acc:.1%}")
+        print(f"Epoch {epoch}/{MAX_EPOCHS}: train acc {train_acc:.1%}, valid acc {valid_acc:.1%}")
+
+        if should_stop_early(valid_accuracies, PATIENCE):
+            print(f"No improvement for {PATIENCE} epochs, stopping early at epoch {epoch}.")
+            break
 
     epoch_num, best_acc = best_epoch(valid_accuracies)
-    print(f"Best epoch: {epoch_num}/{epochs}, valid acc {best_acc:.1%}")
-    print("Previous attempt (lr=1e-4, 15 epochs): 13.6% valid. Baseline: 10.6% valid.")
+    print(f"Best epoch: {epoch_num}/{len(valid_accuracies)}, valid acc {best_acc:.1%}")
+    print("Previous attempt (35 fixed epochs, same lr): best was epoch 13, 13.7% valid.")

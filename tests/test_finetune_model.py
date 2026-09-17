@@ -1,6 +1,6 @@
 """
-Tests for finetune_model.py: layer freezing, augmentation setup, learning rate, and
-best-epoch tracking.
+Tests for finetune_model.py: layer freezing, augmentation setup, learning rate, best-epoch
+tracking, and early stopping logic.
 """
 
 import sys
@@ -56,3 +56,17 @@ def test_best_epoch_handles_last_epoch_being_best():
 
 def test_learning_rate_is_lower_than_previous_attempt():
     assert finetune_model.LEARNING_RATE == 1e-5
+
+
+def test_should_stop_early_false_within_patience():
+    accuracies = [0.10, 0.14, 0.12, 0.11]
+    assert not finetune_model.should_stop_early(accuracies, patience=5)
+
+
+def test_should_stop_early_true_after_patience_exceeded():
+    accuracies = [0.10, 0.14, 0.12, 0.11, 0.10, 0.09, 0.08, 0.07, 0.06]
+    assert finetune_model.should_stop_early(accuracies, patience=5)
+
+
+def test_should_stop_early_false_with_too_few_epochs():
+    assert not finetune_model.should_stop_early([0.10, 0.14], patience=5)

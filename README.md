@@ -11,9 +11,9 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, and five fine-tuning attempts so far, tracking
-down an overfitting problem step by step until it was properly understood. See "Results so far"
-for the full honest breakdown.
+Data pipeline's built, baseline model's done, and six fine-tuning attempts so far, tracking down
+an overfitting problem, then building early stopping so training finds its own best point
+automatically instead of guessing an epoch count. See "Results so far" for the full breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -40,22 +40,20 @@ overfits regardless of augmentation given enough epochs.
 
 **Fine-tuning, attempt 4 (15 epochs, learning rate lowered 10x to 1e-5):** train and valid
 climbed together for the first time, no overfitting gap, but still rising at epoch 15, 13.9%
-valid, meaning 15 epochs wasn't long enough to see where it actually levels off.
+valid.
 
 **Fine-tuning, attempt 5 (35 epochs, same lower learning rate):** best result was epoch 13,
-13.7% valid. After that, valid accuracy drifted down into the 12% range and stayed there, while
-train accuracy kept climbing steadily to 79.9%. So the lower learning rate didn't remove
-overfitting, it just delayed it. The real ceiling for this exact setup (last block unfrozen,
-this augmentation, this learning rate) is around 13-14% valid accuracy, reached at epoch 13.
+13.7% valid. After that, valid drifted down into the 12% range while train kept climbing to
+79.9%, confirming the lower learning rate only delays overfitting rather than fixing it.
 
-The actual lesson from all five attempts: picking a fixed number of epochs in advance is the
-wrong approach here. What matters is stopping training the moment validation accuracy stops
-improving (early stopping), rather than guessing a number upfront and hoping it lands well.
+**Fine-tuning, attempt 6 (same setup, with early stopping added, patience of 8 epochs):**
+training found its own best point automatically rather than needing a guessed epoch count,
+stopping itself at epoch 29 after 8 epochs with no improvement. Best result yet, 14.2% valid at
+epoch 21, beating attempt 5's 13.7%.
 
-Next real step is either adding early stopping so training runs stop themselves at the right
-point automatically, or trying a different structural change, like unfreezing only the final
-layer instead of a whole ResNet block, since less of the network being trainable at once should
-mean less room to overfit in the first place.
+The overfitting problem is properly handled now, early stopping catches it automatically. Next
+real step is trying to actually push accuracy higher, most likely unfreezing more of the network
+(layer3 as well as layer4) or trying a bigger pretrained model (ResNet50 instead of ResNet18).
 
 ## How to run this yourself
 
@@ -71,13 +69,14 @@ countries at first, the archive stays on disk so extracting more later doesn't m
 re-downloading.
 
 Second and third scripts train and evaluate the baseline and fine-tuned models on whatever
-countries have been extracted.
+countries have been extracted. The fine-tuning script stops itself automatically once
+validation accuracy plateaus, no need to guess how long to train for.
 
 ## Testing and git
 
 `tests/` covers the bits that don't need the full dataset, country code lookups, folder
-scanning, and the fine-tuning model's layer-freezing, augmentation, learning rate, and
-best-epoch logic. Will add more as the modelling side grows.
+scanning, and the fine-tuning model's layer-freezing, augmentation, learning rate, best-epoch,
+and early stopping logic. Will add more as the modelling side grows.
 
 ## Tools used
 
