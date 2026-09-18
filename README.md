@@ -11,9 +11,9 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, and six fine-tuning attempts so far, tracking down
-an overfitting problem, then building early stopping so training finds its own best point
-automatically instead of guessing an epoch count. See "Results so far" for the full breakdown.
+Data pipeline's built, baseline model's done, and seven fine-tuning attempts so far, working
+through overfitting, early stopping, and how much of the network is worth unfreezing. See
+"Results so far" for the full breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -43,17 +43,25 @@ climbed together for the first time, no overfitting gap, but still rising at epo
 valid.
 
 **Fine-tuning, attempt 5 (35 epochs, same lower learning rate):** best result was epoch 13,
-13.7% valid. After that, valid drifted down into the 12% range while train kept climbing to
-79.9%, confirming the lower learning rate only delays overfitting rather than fixing it.
+13.7% valid, then valid drifted down while train kept climbing to 79.9%, confirming the lower
+learning rate only delays overfitting rather than fixing it.
 
-**Fine-tuning, attempt 6 (same setup, with early stopping added, patience of 8 epochs):**
-training found its own best point automatically rather than needing a guessed epoch count,
-stopping itself at epoch 29 after 8 epochs with no improvement. Best result yet, 14.2% valid at
-epoch 21, beating attempt 5's 13.7%.
+**Fine-tuning, attempt 6 (same setup, with early stopping, patience of 8):** training found its
+own best point automatically, stopping at epoch 29. Best result yet, 14.2% valid at epoch 21.
 
-The overfitting problem is properly handled now, early stopping catches it automatically. Next
-real step is trying to actually push accuracy higher, most likely unfreezing more of the network
-(layer3 as well as layer4) or trying a bigger pretrained model (ResNet50 instead of ResNet18).
+**Fine-tuning, attempt 7 (layer3 and layer4 both unfrozen instead of just layer4):** tested
+whether letting more of the network adapt would help. It didn't, best was 14.0% valid at epoch
+12, slightly worse than attempt 6, and it got there faster, meaning it started overfitting
+sooner rather than learning more. With only 150 training photos per country, more trainable
+parameters just means more room to memorise, not more room to genuinely learn. Reverting to
+layer4-only going forward, since that's the actual best setup found so far.
+
+The real ceiling for this exact approach (ResNet18, last block fine-tuned, 20 countries, 150
+photos each) looks to be around 14% valid accuracy. Meaningfully better than the 10.6% baseline
+and the 5% random-guess floor, but a genuine limit given how little data there is per country.
+Next real step is probably trying a bigger pretrained model (ResNet50), or scaling up the
+dataset itself to more countries and more photos per country, rather than squeezing more out of
+this exact setup.
 
 ## How to run this yourself
 

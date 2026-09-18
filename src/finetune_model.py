@@ -1,16 +1,10 @@
 """
 Fine-tuning pass on top of the frozen baseline, still just the 20 starter countries.
 
-Five earlier attempts (documented in the README) tracked down an overfitting problem: given
-enough epochs, the model eventually starts memorising the training photos regardless of
-augmentation or a lower learning rate, it just takes longer to happen. Rather than guessing a
-fixed epoch count each time, this version adds early stopping: training stops itself once
-validation accuracy hasn't improved for a set number of epochs (patience), instead of running
-blindly for a fixed length and hoping it lands on a good spot.
-
-Patience is set to 8, based on attempt 5's real data, the best epoch there was 13, and it never
-beat that again in the following 22 epochs, so 8 epochs without improvement is a reasonable
-signal that training has plateaued.
+Seven attempts documented in the README. Best result so far (14.2% valid) came from
+unfreezing only the last ResNet block (layer4), with augmentation, a lower learning rate
+(1e-5), and early stopping to catch overfitting automatically. Unfreezing layer3 as well was
+tried and made things slightly worse, so this stays layer4-only.
 
 Run it with:
     python src/finetune_model.py
@@ -56,7 +50,8 @@ EVAL_TRANSFORM = transforms.Compose([
 
 def build_model(num_classes: int) -> nn.Module:
     """Pretrained ResNet18 with everything frozen except the last block (layer4) and a fresh
-    final layer sized for our number of countries."""
+    final layer sized for our number of countries. Unfreezing layer3 too was tried and did
+    slightly worse (14.0% vs 14.2% valid), so this stays layer4-only."""
     model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
     for param in model.parameters():
         param.requires_grad = False
@@ -99,8 +94,7 @@ def best_epoch(valid_accuracies: list[float]) -> tuple[int, float]:
 
 def should_stop_early(valid_accuracies: list[float], patience: int) -> bool:
     """Returns True once it's been more than `patience` epochs since the best validation
-    accuracy seen so far, meaning training has plateaued and should stop rather than keep
-    running pointlessly (and risking more overfitting the longer it goes on)."""
+    accuracy seen so far, meaning training has plateaued and should stop."""
     if len(valid_accuracies) <= patience:
         return False
     epoch_num, _ = best_epoch(valid_accuracies)
@@ -135,4 +129,4 @@ if __name__ == "__main__":
 
     epoch_num, best_acc = best_epoch(valid_accuracies)
     print(f"Best epoch: {epoch_num}/{len(valid_accuracies)}, valid acc {best_acc:.1%}")
-    print("Previous attempt (35 fixed epochs, same lr): best was epoch 13, 13.7% valid.")
+    print("Best result so far: layer4-only, early stopping, epoch 21, 14.2% valid.")
