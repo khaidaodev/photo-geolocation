@@ -1,10 +1,12 @@
 """
 Fine-tuning pass on top of the frozen baseline, still just the 20 starter countries.
 
-Seven attempts documented in the README. Best result so far (14.2% valid) came from
-unfreezing only the last ResNet block (layer4), with augmentation, a lower learning rate
-(1e-5), and early stopping to catch overfitting automatically. Unfreezing layer3 as well was
-tried and made things slightly worse, so this stays layer4-only.
+Eight attempts so far (documented in the README). Best result with ResNet18 was 14.2% valid,
+using only the last block (layer4) unfrozen, augmentation, a low learning rate, and early
+stopping. This attempt swaps in ResNet50 instead, a bigger pretrained model with a deeper,
+more detailed general understanding of photos, to see if starting from a stronger foundation
+helps even with this small a dataset. Capped at 15 epochs for a first look rather than a full
+run, since ResNet50 is slower to train per epoch than ResNet18 was.
 
 Run it with:
     python src/finetune_model.py
@@ -30,7 +32,7 @@ IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
 LEARNING_RATE = 1e-5
-MAX_EPOCHS = 35
+MAX_EPOCHS = 15
 PATIENCE = 8
 
 TRAIN_TRANSFORM = transforms.Compose([
@@ -49,10 +51,10 @@ EVAL_TRANSFORM = transforms.Compose([
 
 
 def build_model(num_classes: int) -> nn.Module:
-    """Pretrained ResNet18 with everything frozen except the last block (layer4) and a fresh
-    final layer sized for our number of countries. Unfreezing layer3 too was tried and did
-    slightly worse (14.0% vs 14.2% valid), so this stays layer4-only."""
-    model = torchvision.models.resnet18(weights=torchvision.models.ResNet18_Weights.DEFAULT)
+    """Pretrained ResNet50 with everything frozen except the last block (layer4) and a fresh
+    final layer sized for our number of countries. Same layer4-only approach that worked best
+    for ResNet18, just on a bigger, deeper base model this time."""
+    model = torchvision.models.resnet50(weights=torchvision.models.ResNet50_Weights.DEFAULT)
     for param in model.parameters():
         param.requires_grad = False
     for param in model.layer4.parameters():
@@ -110,7 +112,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     valid_loader = DataLoader(valid_data, batch_size=32, shuffle=False)
 
-    print(f"Building model (ResNet18, last block unfrozen, lr={LEARNING_RATE})...")
+    print(f"Building model (ResNet50, last block unfrozen, lr={LEARNING_RATE})...")
     model = build_model(num_classes=len(train_data.classes))
 
     criterion = nn.CrossEntropyLoss()
@@ -129,4 +131,4 @@ if __name__ == "__main__":
 
     epoch_num, best_acc = best_epoch(valid_accuracies)
     print(f"Best epoch: {epoch_num}/{len(valid_accuracies)}, valid acc {best_acc:.1%}")
-    print("Best result so far: layer4-only, early stopping, epoch 21, 14.2% valid.")
+    print("Best result so far (ResNet18, layer4-only): epoch 21, 14.2% valid.")

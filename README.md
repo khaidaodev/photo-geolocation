@@ -11,9 +11,10 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, and seven fine-tuning attempts so far, working
-through overfitting, early stopping, and how much of the network is worth unfreezing. See
-"Results so far" for the full breakdown.
+Data pipeline's built, baseline model's done, and eight fine-tuning attempts so far. The last
+one, swapping in a bigger pretrained model, is the best result yet and still improving when it
+was capped, so that's the next thing to properly finish. See "Results so far" for the full
+breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -49,19 +50,15 @@ learning rate only delays overfitting rather than fixing it.
 **Fine-tuning, attempt 6 (same setup, with early stopping, patience of 8):** training found its
 own best point automatically, stopping at epoch 29. Best result yet, 14.2% valid at epoch 21.
 
-**Fine-tuning, attempt 7 (layer3 and layer4 both unfrozen instead of just layer4):** tested
-whether letting more of the network adapt would help. It didn't, best was 14.0% valid at epoch
-12, slightly worse than attempt 6, and it got there faster, meaning it started overfitting
-sooner rather than learning more. With only 150 training photos per country, more trainable
-parameters just means more room to memorise, not more room to genuinely learn. Reverting to
-layer4-only going forward, since that's the actual best setup found so far.
+**Fine-tuning, attempt 7 (layer3 and layer4 both unfrozen instead of just layer4):** slightly
+worse, 14.0% valid at epoch 12, and it overfit sooner. More trainable parameters just gave the
+model more room to memorise with this little data, not more room to learn. Reverted to
+layer4-only.
 
-The real ceiling for this exact approach (ResNet18, last block fine-tuned, 20 countries, 150
-photos each) looks to be around 14% valid accuracy. Meaningfully better than the 10.6% baseline
-and the 5% random-guess floor, but a genuine limit given how little data there is per country.
-Next real step is probably trying a bigger pretrained model (ResNet50), or scaling up the
-dataset itself to more countries and more photos per country, rather than squeezing more out of
-this exact setup.
+**Fine-tuning, attempt 8 (ResNet50 instead of ResNet18, same layer4-only setup, capped at 15
+epochs as a first look):** new best result, 16.1% valid, and still climbing steadily when the
+run hit its cap. A bigger, more capable pretrained model genuinely helps, even with this small a
+dataset. Needs a proper uncapped run next to find out where it actually plateaus.
 
 ## How to run this yourself
 
