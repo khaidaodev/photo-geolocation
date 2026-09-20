@@ -11,10 +11,10 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, and eight fine-tuning attempts so far. The last
-one, swapping in a bigger pretrained model, is the best result yet and still improving when it
-was capped, so that's the next thing to properly finish. See "Results so far" for the full
-breakdown.
+Data pipeline's built, baseline model's done, and nine fine-tuning attempts so far. Swapping to
+a bigger pretrained model (ResNet50) is the best result yet, and it's still bouncing near its
+best when training stopped, so there may be more to find there. See "Results so far" for the
+full breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -51,14 +51,21 @@ learning rate only delays overfitting rather than fixing it.
 own best point automatically, stopping at epoch 29. Best result yet, 14.2% valid at epoch 21.
 
 **Fine-tuning, attempt 7 (layer3 and layer4 both unfrozen instead of just layer4):** slightly
-worse, 14.0% valid at epoch 12, and it overfit sooner. More trainable parameters just gave the
-model more room to memorise with this little data, not more room to learn. Reverted to
-layer4-only.
+worse, 14.0% valid at epoch 12, and it overfit sooner. Reverted to layer4-only.
 
-**Fine-tuning, attempt 8 (ResNet50 instead of ResNet18, same layer4-only setup, capped at 15
-epochs as a first look):** new best result, 16.1% valid, and still climbing steadily when the
-run hit its cap. A bigger, more capable pretrained model genuinely helps, even with this small a
-dataset. Needs a proper uncapped run next to find out where it actually plateaus.
+**Fine-tuning, attempt 8 (ResNet50 instead of ResNet18, capped at 15 epochs as a first look):**
+new best, 16.1% valid, still climbing steadily when the run hit its cap.
+
+**Fine-tuning, attempt 9 (ResNet50, uncapped this time, up to 35 epochs):** new best, 16.8%
+valid at epoch 31. Ran the full 35 epochs without early stopping ever triggering, valid accuracy
+was still bouncing between 15.7% and 16.8% in the last several epochs rather than settling down,
+so this likely isn't the true ceiling yet either, just where the run happened to stop.
+
+ResNet50 is clearly the stronger base model here, both attempts with it beat every ResNet18
+attempt. Next real step is either letting it run for even longer to see if it keeps improving,
+or trying unfreezing layer3 as well on ResNet50 specifically, since ResNet50 has far more total
+parameters than ResNet18, so the "too much capacity for too little data" problem found in
+attempt 7 might not apply the same way here.
 
 ## How to run this yourself
 
