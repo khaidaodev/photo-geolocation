@@ -11,10 +11,8 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, and nine fine-tuning attempts so far. Swapping to
-a bigger pretrained model (ResNet50) is the best result yet, and it's still bouncing near its
-best when training stopped, so there may be more to find there. See "Results so far" for the
-full breakdown.
+Data pipeline's built, baseline model's done, and ten fine-tuning attempts so far. ResNet50 has
+now properly found its actual plateau, 17.1% valid. See "Results so far" for the full breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -56,16 +54,22 @@ worse, 14.0% valid at epoch 12, and it overfit sooner. Reverted to layer4-only.
 **Fine-tuning, attempt 8 (ResNet50 instead of ResNet18, capped at 15 epochs as a first look):**
 new best, 16.1% valid, still climbing steadily when the run hit its cap.
 
-**Fine-tuning, attempt 9 (ResNet50, uncapped this time, up to 35 epochs):** new best, 16.8%
-valid at epoch 31. Ran the full 35 epochs without early stopping ever triggering, valid accuracy
-was still bouncing between 15.7% and 16.8% in the last several epochs rather than settling down,
-so this likely isn't the true ceiling yet either, just where the run happened to stop.
+**Fine-tuning, attempt 9 (ResNet50, uncapped up to 35 epochs):** new best, 16.8% valid at epoch
+31, but ran the full 35 epochs without early stopping ever triggering, so still not the true
+ceiling.
 
-ResNet50 is clearly the stronger base model here, both attempts with it beat every ResNet18
-attempt. Next real step is either letting it run for even longer to see if it keeps improving,
-or trying unfreezing layer3 as well on ResNet50 specifically, since ResNet50 has far more total
-parameters than ResNet18, so the "too much capacity for too little data" problem found in
-attempt 7 might not apply the same way here.
+**Fine-tuning, attempt 10 (ResNet50, cap raised to 60 epochs):** early stopping finally
+triggered on its own, stopping at epoch 42 after 8 epochs with no improvement. Real best point:
+epoch 34, 17.1% valid, the actual plateau for this setup rather than a run cut short. Took
+5 hours 17 minutes on CPU, by far the longest run so far, ResNet50 at this many epochs is
+genuinely slow without a GPU.
+
+ResNet50 with layer4 unfrozen, this augmentation, and this learning rate genuinely plateaus
+around 17%, a real, found ceiling rather than a guess. That's a solid improvement over the
+ResNet18 ceiling of 14.2%, and a long way past the 5% random-guessing floor. Next real step is
+either scaling up to more of the 211 countries now that this setup's properly understood, or
+trying unfreezing layer3 as well on ResNet50 specifically, since it wasn't tested for this
+bigger model yet, only on ResNet18 where it made things worse.
 
 ## How to run this yourself
 
@@ -82,13 +86,14 @@ re-downloading.
 
 Second and third scripts train and evaluate the baseline and fine-tuned models on whatever
 countries have been extracted. The fine-tuning script stops itself automatically once
-validation accuracy plateaus, no need to guess how long to train for.
+validation accuracy plateaus, no need to guess how long to train for, though with ResNet50 and
+a high epoch cap, expect it to genuinely take several hours on a CPU.
 
 ## Testing and git
 
 `tests/` covers the bits that don't need the full dataset, country code lookups, folder
-scanning, and the fine-tuning model's layer-freezing, augmentation, learning rate, best-epoch,
-and early stopping logic. Will add more as the modelling side grows.
+scanning, and both models' feature extraction, layer-freezing, augmentation, learning rate,
+best-epoch, and early stopping logic. Will add more as the modelling side grows.
 
 ## Tools used
 
