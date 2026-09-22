@@ -13,11 +13,12 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 import finetune_model
 
 
-def test_only_layer4_and_fc_are_trainable():
+def test_layer3_layer4_and_fc_are_trainable():
     model = finetune_model.build_model(num_classes=20)
 
+    trainable_prefixes = ("layer3", "layer4", "fc")
     for name, param in model.named_parameters():
-        if name.startswith("layer4") or name.startswith("fc"):
+        if name.startswith(trainable_prefixes):
             assert param.requires_grad, f"{name} should be trainable"
         else:
             assert not param.requires_grad, f"{name} should be frozen"

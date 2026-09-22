@@ -11,8 +11,9 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, and ten fine-tuning attempts so far. ResNet50 has
-now properly found its actual plateau, 17.1% valid. See "Results so far" for the full breakdown.
+Data pipeline's built, baseline model's done, and eleven fine-tuning attempts so far. Confirmed
+best is ResNet50, layer4-only, 17.1% valid. A quick test of unfreezing more layers on ResNet50
+is still inconclusive, see "Results so far" for the full breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -48,8 +49,8 @@ learning rate only delays overfitting rather than fixing it.
 **Fine-tuning, attempt 6 (same setup, with early stopping, patience of 8):** training found its
 own best point automatically, stopping at epoch 29. Best result yet, 14.2% valid at epoch 21.
 
-**Fine-tuning, attempt 7 (layer3 and layer4 both unfrozen instead of just layer4):** slightly
-worse, 14.0% valid at epoch 12, and it overfit sooner. Reverted to layer4-only.
+**Fine-tuning, attempt 7 (layer3 and layer4 both unfrozen instead of just layer4, ResNet18):**
+slightly worse, 14.0% valid at epoch 12, and it overfit sooner. Reverted to layer4-only.
 
 **Fine-tuning, attempt 8 (ResNet50 instead of ResNet18, capped at 15 epochs as a first look):**
 new best, 16.1% valid, still climbing steadily when the run hit its cap.
@@ -60,16 +61,20 @@ ceiling.
 
 **Fine-tuning, attempt 10 (ResNet50, cap raised to 60 epochs):** early stopping finally
 triggered on its own, stopping at epoch 42 after 8 epochs with no improvement. Real best point:
-epoch 34, 17.1% valid, the actual plateau for this setup rather than a run cut short. Took
-5 hours 17 minutes on CPU, by far the longest run so far, ResNet50 at this many epochs is
-genuinely slow without a GPU.
+epoch 34, 17.1% valid, the confirmed plateau for this setup. Took 5 hours 17 minutes on CPU.
 
-ResNet50 with layer4 unfrozen, this augmentation, and this learning rate genuinely plateaus
-around 17%, a real, found ceiling rather than a guess. That's a solid improvement over the
-ResNet18 ceiling of 14.2%, and a long way past the 5% random-guessing floor. Next real step is
-either scaling up to more of the 211 countries now that this setup's properly understood, or
-trying unfreezing layer3 as well on ResNet50 specifically, since it wasn't tested for this
-bigger model yet, only on ResNet18 where it made things worse.
+**Fine-tuning, attempt 11 (ResNet50, layer3+layer4 both unfrozen, capped at 15 epochs as a
+quick first look):** 16.5% valid at epoch 14, still climbing when the run hit its cap. Roughly
+in line with where layer4-only was at the same 15-epoch point, so this is genuinely inconclusive
+so far, not yet known whether unfreezing layer3 helps or hurts on this bigger model the way it
+hurt on ResNet18. Also noticeably slower per epoch than layer4-only, 2 hours 41 minutes for just
+15 epochs, so a full uncapped run to settle this properly would take considerably longer than
+the 5h17m the layer4-only version needed.
+
+Confirmed ceiling so far: ResNet50, layer4-only, 17.1% valid. Whether layer3+layer4 beats that
+is still an open question, next real step is either committing to the full multi-hour run to
+find out properly, or moving on to scaling up to more of the 211 countries instead, since that's
+also flagged as worth trying and doesn't carry the same multi-hour cost per attempt.
 
 ## How to run this yourself
 
