@@ -1,11 +1,12 @@
 """
 Tests for finetune_model.py: layer freezing, augmentation setup, learning rate, best-epoch
-tracking, and early stopping logic.
+tracking, early stopping, and checkpoint saving.
 """
 
 import sys
 from pathlib import Path
 
+import torch
 from torchvision import transforms
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -13,12 +14,11 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 import finetune_model
 
 
-def test_layer3_layer4_and_fc_are_trainable():
+def test_only_layer4_and_fc_are_trainable():
     model = finetune_model.build_model(num_classes=20)
 
-    trainable_prefixes = ("layer3", "layer4", "fc")
     for name, param in model.named_parameters():
-        if name.startswith(trainable_prefixes):
+        if name.startswith("layer4") or name.startswith("fc"):
             assert param.requires_grad, f"{name} should be trainable"
         else:
             assert not param.requires_grad, f"{name} should be frozen"
@@ -71,3 +71,16 @@ def test_should_stop_early_true_after_patience_exceeded():
 
 def test_should_stop_early_false_with_too_few_epochs():
     assert not finetune_model.should_stop_early([0.10, 0.14], patience=5)
+
+
+def test_save_checkpoint_saves_model_classes_and_accuracy(tmp_path):
+    model = finetune_model.build_model(num_classes=3)
+    class_names = ["US", "GB", "FR"]
+    save_path = tmp_path / "test_model.pt"
+
+    finetune_model.save_checkpoint(model, class_names, 0.42, save_path)
+    checkpoint = torch.load(save_path, weights_only=False)
+
+    assert checkpoint["class_names"] == class_names
+    assert checkpoint["valid_accuracy"] == 0.42
+    assert "model_state_dict" in checkpoint
