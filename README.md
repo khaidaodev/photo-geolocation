@@ -11,10 +11,9 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, twelve fine-tuning attempts so far, and there's
-now a working prediction script that loads the best saved model and guesses the country of any
-new photo you give it, with confidence percentages. See "Results so far" for the full
-breakdown.
+Data pipeline's built, baseline model's done, twelve fine-tuning attempts so far, a working
+prediction script, and now a proper honest test-set result plus a confusion matrix showing
+which countries it actually mixes up. See "Results so far" for the full breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -70,8 +69,17 @@ in line with layer4-only at the same point. Genuinely inconclusive, still an ope
 
 **Fine-tuning, attempt 12 (ResNet50, layer4-only, 20 epochs, with model saving added):** 16.7%
 valid at epoch 17. Broadly consistent with the confirmed 17.1% ceiling from attempt 10, small
-run-to-run variation is expected. Took 2 hours 40 minutes. The best model from this run is
-saved to `models/best_model.pt` and used by the new prediction script below.
+run-to-run variation is expected. Took 2 hours 40 minutes. Best model saved to
+`models/best_model.pt`.
+
+**Final honest test-set result:** ran the saved model against the test split, the one part of
+the dataset never touched anywhere else in this whole project, not for training, not for
+picking the best epoch. 16.0% accuracy, close to the 16.7% validation number from the same run,
+a good sign the model isn't quietly overfit to validation either. A confusion matrix (a table
+showing exactly which countries get mixed up with which) surfaced the most common mistakes: Thailand guessed as South Korea, Japan guessed as South Korea, Australia guessed as South
+Africa, India and the US both sometimes guessed as South Africa. These aren't random errors,
+they line up with genuine regional visual overlap (similar architecture, signage, or scenery),
+suggesting the model's picking up on real patterns rather than guessing blind, even when wrong.
 
 ## Try it on your own photo
 
@@ -100,6 +108,7 @@ python3 src/data_loading.py
 python3 src/baseline_model.py
 python3 src/finetune_model.py
 python3 src/predict.py path/to/your/photo.jpg
+python3 src/confusion_matrix.py
 ```
 
 First script downloads Country211 (~11GB, one-time). Worth only extracting the 20 starter
@@ -111,13 +120,16 @@ trains. Stops itself automatically once validation accuracy plateaus, no need to
 long to train for, though with ResNet50 and a high epoch cap, expect it to genuinely take
 hours on a CPU.
 
+Last script runs the saved model against the untouched test split for an honest final accuracy
+number, plus prints the most commonly confused country pairs.
+
 ## Testing and git
 
 `tests/` covers the bits that don't need the full dataset, country code lookups, folder
 scanning, both models' feature extraction, layer-freezing, augmentation, learning rate,
-best-epoch, early stopping, and checkpoint saving logic, plus the prediction script's ranking
-and model-loading logic (3 tests, all pass in about 2 seconds), all using fake data and fake
-models rather than needing a real trained model to test against.
+best-epoch, early stopping, and checkpoint saving logic, the prediction script's ranking and
+model-loading logic, and the confusion matrix's counting and mix-up-finding logic, all using
+fake data and fake models rather than needing a real trained model to test against.
 
 ## Tools used
 
