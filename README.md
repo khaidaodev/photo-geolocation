@@ -11,9 +11,10 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, and eleven fine-tuning attempts so far. Confirmed
-best is ResNet50, layer4-only, 17.1% valid. A quick test of unfreezing more layers on ResNet50
-is still inconclusive, see "Results so far" for the full breakdown.
+Data pipeline's built, baseline model's done, twelve fine-tuning attempts so far, and there's
+now a working prediction script that loads the best saved model and guesses the country of any
+new photo you give it, with confidence percentages. See "Results so far" for the full
+breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -64,17 +65,32 @@ triggered on its own, stopping at epoch 42 after 8 epochs with no improvement. R
 epoch 34, 17.1% valid, the confirmed plateau for this setup. Took 5 hours 17 minutes on CPU.
 
 **Fine-tuning, attempt 11 (ResNet50, layer3+layer4 both unfrozen, capped at 15 epochs as a
-quick first look):** 16.5% valid at epoch 14, still climbing when the run hit its cap. Roughly
-in line with where layer4-only was at the same 15-epoch point, so this is genuinely inconclusive
-so far, not yet known whether unfreezing layer3 helps or hurts on this bigger model the way it
-hurt on ResNet18. Also noticeably slower per epoch than layer4-only, 2 hours 41 minutes for just
-15 epochs, so a full uncapped run to settle this properly would take considerably longer than
-the 5h17m the layer4-only version needed.
+quick first look):** 16.5% valid at epoch 14, still climbing when the run hit its cap, roughly
+in line with layer4-only at the same point. Genuinely inconclusive, still an open question.
 
-Confirmed ceiling so far: ResNet50, layer4-only, 17.1% valid. Whether layer3+layer4 beats that
-is still an open question, next real step is either committing to the full multi-hour run to
-find out properly, or moving on to scaling up to more of the 211 countries instead, since that's
-also flagged as worth trying and doesn't carry the same multi-hour cost per attempt.
+**Fine-tuning, attempt 12 (ResNet50, layer4-only, 20 epochs, with model saving added):** 16.7%
+valid at epoch 17. Broadly consistent with the confirmed 17.1% ceiling from attempt 10, small
+run-to-run variation is expected. Took 2 hours 40 minutes. The best model from this run is
+saved to `models/best_model.pt` and used by the new prediction script below.
+
+## Try it on your own photo
+
+`src/predict.py` loads the best saved model and predicts the top 3 most likely countries for
+any photo you give it, with a genuine confidence percentage for each (not just a raw guess).
+
+```bash
+python3 src/predict.py path/to/your/photo.jpg
+```
+
+Only works on JPG or PNG, not HEIC (the default iPhone format), convert first if needed:
+```bash
+sips -s format jpeg photo.HEIC --out photo.jpg
+```
+
+Since the model's only trained on the 20 starter countries so far, and only really learns
+outdoor, geographic clues (landscapes, architecture, road signs), a photo with nothing
+geographic in it will come back with low, scattered confidence rather than a strong guess,
+that's expected behaviour, not a bug.
 
 ## How to run this yourself
 
@@ -83,22 +99,25 @@ pip3 install -r requirements.txt
 python3 src/data_loading.py
 python3 src/baseline_model.py
 python3 src/finetune_model.py
+python3 src/predict.py path/to/your/photo.jpg
 ```
 
 First script downloads Country211 (~11GB, one-time). Worth only extracting the 20 starter
 countries at first, the archive stays on disk so extracting more later doesn't mean
 re-downloading.
 
-Second and third scripts train and evaluate the baseline and fine-tuned models on whatever
-countries have been extracted. The fine-tuning script stops itself automatically once
-validation accuracy plateaus, no need to guess how long to train for, though with ResNet50 and
-a high epoch cap, expect it to genuinely take several hours on a CPU.
+Third script trains the model and saves the best version to `models/best_model.pt` as it
+trains. Stops itself automatically once validation accuracy plateaus, no need to guess how
+long to train for, though with ResNet50 and a high epoch cap, expect it to genuinely take
+hours on a CPU.
 
 ## Testing and git
 
 `tests/` covers the bits that don't need the full dataset, country code lookups, folder
-scanning, and both models' feature extraction, layer-freezing, augmentation, learning rate,
-best-epoch, and early stopping logic. Will add more as the modelling side grows.
+scanning, both models' feature extraction, layer-freezing, augmentation, learning rate,
+best-epoch, early stopping, and checkpoint saving logic, plus the prediction script's ranking
+and model-loading logic (3 tests, all pass in about 2 seconds), all using fake data and fake
+models rather than needing a real trained model to test against.
 
 ## Tools used
 
