@@ -1,11 +1,11 @@
 """
 Fine-tuning pass on top of the frozen baseline, still just the 20 starter countries.
 
-Eleven attempts documented in the README. Best confirmed result: ResNet50, layer4-only,
-17.1% valid, found with early stopping over 42 epochs. This version adds model saving,
-whenever validation accuracy hits a new best, that exact version of the model gets saved to
-models/best_model.pt, so a separate prediction script can later load it and actually guess
-countries for new photos, instead of the trained model just being thrown away at the end.
+Twelve attempts documented in the README. Confirmed best: ResNet50, layer4-only, 17.1% valid,
+16.0% on the untouched test set. Attempt 11 tried unfreezing layer3 as well but was only given
+15 capped epochs, still climbing when it stopped, genuinely inconclusive. This run settles that
+properly: layer3+layer4 unfrozen, cap raised high enough that early stopping (not a guessed
+epoch count) decides when training's actually done.
 
 Run it with:
     python src/finetune_model.py
@@ -32,7 +32,7 @@ IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
 LEARNING_RATE = 1e-5
-MAX_EPOCHS = 20
+MAX_EPOCHS = 60
 PATIENCE = 8
 
 TRAIN_TRANSFORM = transforms.Compose([
@@ -51,12 +51,14 @@ EVAL_TRANSFORM = transforms.Compose([
 
 
 def build_model(num_classes: int) -> nn.Module:
-    """Pretrained ResNet50 with everything frozen except the last block (layer4) and a fresh
-    final layer sized for our number of countries. This is the confirmed best setup, 17.1%
-    valid accuracy over a full 60-epoch run."""
+    """Pretrained ResNet50 with everything frozen except layer3, layer4, and a fresh final
+    layer sized for our number of countries. Testing whether unfreezing more of the network
+    genuinely helps here, properly this time with enough epochs to actually plateau."""
     model = torchvision.models.resnet50(weights=torchvision.models.ResNet50_Weights.DEFAULT)
     for param in model.parameters():
         param.requires_grad = False
+    for param in model.layer3.parameters():
+        param.requires_grad = True
     for param in model.layer4.parameters():
         param.requires_grad = True
     model.fc = nn.Linear(model.fc.in_features, num_classes)
@@ -107,8 +109,7 @@ def should_stop_early(valid_accuracies: list[float], patience: int) -> bool:
 def save_checkpoint(model: nn.Module, class_names: list[str], valid_acc: float, path: Path):
     """Saves the model's weights alongside the country codes it was trained on and how well it
     did, so a prediction script can later load it and know both how to use it and how much to
-    trust it. Saved as a plain dict rather than the whole model object, the standard, safer way
-    to save a PyTorch model."""
+    trust it."""
     path.parent.mkdir(parents=True, exist_ok=True)
     torch.save({
         "model_state_dict": model.state_dict(),
@@ -125,7 +126,7 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     valid_loader = DataLoader(valid_data, batch_size=32, shuffle=False)
 
-    print(f"Building model (ResNet50, last block unfrozen, lr={LEARNING_RATE})...")
+    print(f"Building model (ResNet50, layer3+layer4 unfrozen, lr={LEARNING_RATE})...")
     model = build_model(num_classes=len(train_data.classes))
 
     criterion = nn.CrossEntropyLoss()
@@ -147,4 +148,4 @@ if __name__ == "__main__":
 
     epoch_num, best_acc = best_epoch(valid_accuracies)
     print(f"Best epoch: {epoch_num}/{len(valid_accuracies)}, valid acc {best_acc:.1%}")
-    print(f"Best model saved to {MODEL_PATH}")
+    print("Confirmed layer4-only ceiling: 17.1% valid (epoch 34 of a 60-epoch run).")

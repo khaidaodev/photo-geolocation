@@ -11,9 +11,9 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, twelve fine-tuning attempts so far, a working
-prediction script, and now a proper honest test-set result plus a confusion matrix showing
-which countries it actually mixes up. See "Results so far" for the full breakdown.
+Data pipeline's built, baseline model's done, thirteen fine-tuning attempts so far, a working
+prediction script, and an honest final test-set result with a confusion matrix. See "Results so
+far" for the full breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -65,21 +65,30 @@ epoch 34, 17.1% valid, the confirmed plateau for this setup. Took 5 hours 17 min
 
 **Fine-tuning, attempt 11 (ResNet50, layer3+layer4 both unfrozen, capped at 15 epochs as a
 quick first look):** 16.5% valid at epoch 14, still climbing when the run hit its cap, roughly
-in line with layer4-only at the same point. Genuinely inconclusive, still an open question.
+in line with layer4-only at the same point. Left genuinely inconclusive at the time.
 
 **Fine-tuning, attempt 12 (ResNet50, layer4-only, 20 epochs, with model saving added):** 16.7%
-valid at epoch 17. Broadly consistent with the confirmed 17.1% ceiling from attempt 10, small
-run-to-run variation is expected. Took 2 hours 40 minutes. Best model saved to
-`models/best_model.pt`.
+valid at epoch 17. Broadly consistent with the confirmed 17.1% ceiling from attempt 10. Best
+model saved to `models/best_model.pt`.
 
-**Final honest test-set result:** ran the saved model against the test split, the one part of
-the dataset never touched anywhere else in this whole project, not for training, not for
-picking the best epoch. 16.0% accuracy, close to the 16.7% validation number from the same run,
-a good sign the model isn't quietly overfit to validation either. A confusion matrix (a table
-showing exactly which countries get mixed up with which) surfaced the most common mistakes: Thailand guessed as South Korea, Japan guessed as South Korea, Australia guessed as South
-Africa, India and the US both sometimes guessed as South Africa. These aren't random errors,
-they line up with genuine regional visual overlap (similar architecture, signage, or scenery),
-suggesting the model's picking up on real patterns rather than guessing blind, even when wrong.
+**Final honest test-set result:** ran the saved model against the untouched test split, never
+used anywhere else in this project. 16.0% accuracy, close to the 16.7% validation number from
+the same run. A confusion matrix surfaced the most common mistakes: Thailand guessed as South
+Korea, Japan guessed as South Korea, Australia guessed as South Africa, India and the US both
+sometimes guessed as South Africa. These line up with genuine regional visual overlap rather
+than random error.
+
+**Fine-tuning, attempt 13 (ResNet50, layer3+layer4 unfrozen, properly uncapped this time, up to
+60 epochs):** settles attempt 11 for good. Early stopping triggered at epoch 32, best epoch 24,
+17.0% valid, essentially tied with the confirmed 17.1% layer4-only ceiling. Unlike on ResNet18
+(where unfreezing layer3 clearly hurt), on ResNet50 it makes no real difference either way. Took
+5 hours 26 minutes, left running overnight. Layer4-only stays the simpler choice since it trains faster for the same
+result, no reason to unfreeze more of the network here.
+
+The ceiling for this approach (ResNet50, 20 countries, 150 training photos each) is properly
+settled now, around 17% valid, 16% on genuinely unseen test data. Next real step is scaling up
+to more of the 211 countries, since that's the one direction not yet tried and the original
+plan from the start of this project.
 
 ## Try it on your own photo
 
