@@ -11,22 +11,22 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 
 ## Where it's at right now
 
-Data pipeline's built, baseline model's done, thirteen fine-tuning attempts so far, a working
-prediction script, and an honest final test-set result with a confusion matrix. See "Results so
-far" for the full breakdown.
+Data pipeline's built, the 20-country problem is fully solved and understood (17.1% ceiling),
+and there's now a first real result scaling up to 50 countries. See "Results so far" for the
+full breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
 
-211-way classification is brutal, even CLIP struggles with it. First pass sticks to 20 well
-known, visually distinct countries (see `STARTER_COUNTRIES` in `src/data_loading.py`), then
-scales up once that's actually working.
+211-way classification is brutal, even CLIP struggles with it. First pass stuck to 20 well
+known, visually distinct countries (see `STARTER_COUNTRIES` in `src/data_loading.py`), now
+scaling up towards the full 211.
 
 ## Results so far
 
 **Baseline:** a frozen pretrained ResNet18 turns each photo into a 512-number summary, then a
 logistic regression trained on top guesses the country. 10.6% validation accuracy, vs 5% for
-random guessing.
+random guessing (20 countries).
 
 **Fine-tuning, attempt 1 (5 epochs, no augmentation):** unfroze the last ResNet block, trained
 directly. 99.3% train accuracy, 13.0% valid, classic overfitting.
@@ -64,31 +64,40 @@ triggered on its own, stopping at epoch 42 after 8 epochs with no improvement. R
 epoch 34, 17.1% valid, the confirmed plateau for this setup. Took 5 hours 17 minutes on CPU.
 
 **Fine-tuning, attempt 11 (ResNet50, layer3+layer4 both unfrozen, capped at 15 epochs as a
-quick first look):** 16.5% valid at epoch 14, still climbing when the run hit its cap, roughly
-in line with layer4-only at the same point. Left genuinely inconclusive at the time.
+quick first look):** 16.5% valid at epoch 14, still climbing when the run hit its cap. Left
+genuinely inconclusive at the time.
 
 **Fine-tuning, attempt 12 (ResNet50, layer4-only, 20 epochs, with model saving added):** 16.7%
 valid at epoch 17. Broadly consistent with the confirmed 17.1% ceiling from attempt 10. Best
 model saved to `models/best_model.pt`.
 
-**Final honest test-set result:** ran the saved model against the untouched test split, never
-used anywhere else in this project. 16.0% accuracy, close to the 16.7% validation number from
-the same run. A confusion matrix surfaced the most common mistakes: Thailand guessed as South
-Korea, Japan guessed as South Korea, Australia guessed as South Africa, India and the US both
-sometimes guessed as South Africa. These line up with genuine regional visual overlap rather
+**Final honest test-set result (20 countries):** ran the saved model against the untouched test
+split, never used anywhere else in this project. 16.0% accuracy, close to the 16.7% validation
+number from the same run. A confusion matrix surfaced the most common mistakes: Thailand
+guessed as South Korea, Japan guessed as South Korea, Australia guessed as South Africa, India
+and the US both sometimes guessed as South Africa, all genuine regional visual overlap rather
 than random error.
 
-**Fine-tuning, attempt 13 (ResNet50, layer3+layer4 unfrozen, properly uncapped this time, up to
-60 epochs):** settles attempt 11 for good. Early stopping triggered at epoch 32, best epoch 24,
-17.0% valid, essentially tied with the confirmed 17.1% layer4-only ceiling. Unlike on ResNet18
-(where unfreezing layer3 clearly hurt), on ResNet50 it makes no real difference either way. Took
-5 hours 26 minutes, left running overnight. Layer4-only stays the simpler choice since it trains faster for the same
-result, no reason to unfreeze more of the network here.
+**Fine-tuning, attempt 13 (ResNet50, layer3+layer4 unfrozen, properly uncapped, up to 60
+epochs):** settles attempt 11 for good. Early stopping triggered at epoch 32, best epoch 24,
+17.0% valid, essentially tied with the confirmed 17.1% layer4-only ceiling. Left running
+overnight since 5+ hours was too long to sit and wait for. Layer4-only stays the simpler choice
+since it trains faster for the same result, no reason to unfreeze more of the network here.
 
-The ceiling for this approach (ResNet50, 20 countries, 150 training photos each) is properly
-settled now, around 17% valid, 16% on genuinely unseen test data. Next real step is scaling up
-to more of the 211 countries, since that's the one direction not yet tried and the original
-plan from the start of this project.
+The 20-country problem is fully solved and understood at this point: ResNet50, layer4-only,
+around 17% valid, 16% on genuinely unseen test data.
+
+**Fine-tuning, attempt 14 (scaling up to 50 countries, same confirmed 20-country setup, no
+new hyperparameters guessed on top of a bigger dataset at the same time):** early stopping
+triggered at epoch 31, best epoch 23, 13.0% valid. Down from the 17.1% ceiling on 20 countries,
+but still 6.5x better than random guessing across 50 countries (2.0%). This is the expected,
+sensible trade-off of a genuinely harder problem, not a broken setup, more countries to tell
+apart means more ways to be wrong. Took 9 hours 30 minutes, nearly double the 20-country run,
+matching the roughly 2.5x more training photos overall.
+
+Next real step is deciding whether to push further towards all 211 countries, or first try to
+recover some of that lost accuracy on 50 countries specifically (more epochs, a stronger
+pretrained model, or re-testing whether unfreezing more layers helps differently at this scale).
 
 ## Try it on your own photo
 
@@ -104,10 +113,9 @@ Only works on JPG or PNG, not HEIC (the default iPhone format), convert first if
 sips -s format jpeg photo.HEIC --out photo.jpg
 ```
 
-Since the model's only trained on the 20 starter countries so far, and only really learns
-outdoor, geographic clues (landscapes, architecture, road signs), a photo with nothing
-geographic in it will come back with low, scattered confidence rather than a strong guess,
-that's expected behaviour, not a bug.
+Since the model only learns outdoor, geographic clues (landscapes, architecture, road signs), a
+photo with nothing geographic in it will come back with low, scattered confidence rather than a
+strong guess, that's expected behaviour, not a bug.
 
 ## How to run this yourself
 
@@ -120,14 +128,13 @@ python3 src/predict.py path/to/your/photo.jpg
 python3 src/confusion_matrix.py
 ```
 
-First script downloads Country211 (~11GB, one-time). Worth only extracting the 20 starter
-countries at first, the archive stays on disk so extracting more later doesn't mean
-re-downloading.
+First script downloads Country211 (~11GB, one-time). The archive stays on disk after
+extraction, so pulling out more countries later doesn't mean re-downloading.
 
-Third script trains the model and saves the best version to `models/best_model.pt` as it
-trains. Stops itself automatically once validation accuracy plateaus, no need to guess how
-long to train for, though with ResNet50 and a high epoch cap, expect it to genuinely take
-hours on a CPU.
+Third script trains the model on whatever countries have actually been extracted, and saves
+the best version to `models/best_model.pt` as it trains. Stops itself automatically once
+validation accuracy plateaus. With ResNet50 and more countries, expect real training runs to
+take many hours, sometimes overnight, on a CPU.
 
 Last script runs the saved model against the untouched test split for an honest final accuracy
 number, plus prints the most commonly confused country pairs.

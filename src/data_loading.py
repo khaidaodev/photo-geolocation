@@ -30,6 +30,9 @@ RAW_DIR = DATA_DIR / "raw"
 STARTER_COUNTRIES = [
     "US", "GB", "FR", "DE", "IT", "ES", "JP", "IN", "BR", "AU",
     "RU", "EG", "TH", "MX", "ZA", "AR", "TR", "KR", "NL", "GR",
+    "CA", "CN", "PT", "PL", "SE", "NO", "AT", "CH", "IE", "IS",
+    "MA", "KE", "NG", "ID", "VN", "PH", "MY", "SG", "NZ", "CL",
+    "PE", "CO", "CU", "IL", "SA", "AE", "UA", "CZ", "HU", "FI",
 ]
 
 

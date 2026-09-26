@@ -1,11 +1,10 @@
 """
-Fine-tuning pass on top of the frozen baseline, still just the 20 starter countries.
+Fine-tuning pass on top of the frozen baseline, now scaled up from 20 to 50 countries.
 
-Twelve attempts documented in the README. Confirmed best: ResNet50, layer4-only, 17.1% valid,
-16.0% on the untouched test set. Attempt 11 tried unfreezing layer3 as well but was only given
-15 capped epochs, still climbing when it stopped, genuinely inconclusive. This run settles that
-properly: layer3+layer4 unfrozen, cap raised high enough that early stopping (not a guessed
-epoch count) decides when training's actually done.
+Thirteen attempts on the 20-country set (documented in the README) settled on ResNet50 with
+layer4 unfrozen as the confirmed best, fastest setup, 17.1% valid on 20 countries. This is the
+first run against the harder, 50-country problem, using that same confirmed setup rather than
+guessing new hyperparameters on top of a bigger dataset at the same time.
 
 Run it with:
     python src/finetune_model.py
@@ -51,14 +50,12 @@ EVAL_TRANSFORM = transforms.Compose([
 
 
 def build_model(num_classes: int) -> nn.Module:
-    """Pretrained ResNet50 with everything frozen except layer3, layer4, and a fresh final
-    layer sized for our number of countries. Testing whether unfreezing more of the network
-    genuinely helps here, properly this time with enough epochs to actually plateau."""
+    """Pretrained ResNet50 with everything frozen except the last block (layer4) and a fresh
+    final layer sized for our number of countries. Confirmed best, fastest setup from the
+    20-country experiments, now tested against the harder 50-country problem."""
     model = torchvision.models.resnet50(weights=torchvision.models.ResNet50_Weights.DEFAULT)
     for param in model.parameters():
         param.requires_grad = False
-    for param in model.layer3.parameters():
-        param.requires_grad = True
     for param in model.layer4.parameters():
         param.requires_grad = True
     model.fc = nn.Linear(model.fc.in_features, num_classes)
@@ -119,14 +116,14 @@ def save_checkpoint(model: nn.Module, class_names: list[str], valid_acc: float, 
 
 
 if __name__ == "__main__":
-    print("Loading train/valid splits (20 starter countries)...")
+    print("Loading train/valid splits (50 countries)...")
     train_data = torchvision.datasets.ImageFolder(str(COUNTRY211_DIR / "train"), transform=TRAIN_TRANSFORM)
     valid_data = torchvision.datasets.ImageFolder(str(COUNTRY211_DIR / "valid"), transform=EVAL_TRANSFORM)
 
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     valid_loader = DataLoader(valid_data, batch_size=32, shuffle=False)
 
-    print(f"Building model (ResNet50, layer3+layer4 unfrozen, lr={LEARNING_RATE})...")
+    print(f"Building model (ResNet50, last block unfrozen, lr={LEARNING_RATE}, {len(train_data.classes)} classes)...")
     model = build_model(num_classes=len(train_data.classes))
 
     criterion = nn.CrossEntropyLoss()
@@ -148,4 +145,5 @@ if __name__ == "__main__":
 
     epoch_num, best_acc = best_epoch(valid_accuracies)
     print(f"Best epoch: {epoch_num}/{len(valid_accuracies)}, valid acc {best_acc:.1%}")
-    print("Confirmed layer4-only ceiling: 17.1% valid (epoch 34 of a 60-epoch run).")
+    print("Confirmed 20-country ceiling for comparison: 17.1% valid.")
+    print(f"(random guessing across {len(train_data.classes)} countries would be {1 / len(train_data.classes):.1%})")
