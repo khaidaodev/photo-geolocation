@@ -12,9 +12,9 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 ## Where it's at right now
 
 Data pipeline's built, the 20-country problem is fully solved and understood (17.1% ceiling),
-and the 50-country version is settled too (13.0% valid). The question of how much of the
-network to unfreeze gave the same answer at both sizes. See "Results so far" for the full
-breakdown.
+and the 50-country version is settled too (13.0% valid, 12.1% on the untouched test split). The
+question of how much of the network to unfreeze gave the same answer at both sizes. See
+"Results so far" for the full breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -102,10 +102,19 @@ automatically carry over to a bigger one. It did. Early stopping triggered at ep
 epoch 24, 13.0% valid, exactly the same as layer4-only. Took 12 hours 19 minutes, the longest
 run so far, for no gain at all. Layer4-only stays the setup to use at both sizes.
 
+**Final honest test-set result (50 countries):** ran the saved model (the one from attempt 15,
+which tied layer4-only at 13.0%) against the untouched test split of 5,000 photos. 12.1%
+accuracy, close to the 13.0% validation number, so the model isn't quietly overfit to the
+validation photos. About 6x better than random guessing (2.0%). Took about 7 minutes. The most
+common mistakes were Kenya guessed as South Africa (19 times) and South Africa guessed as Kenya
+(12 times), Kenya guessed as Nigeria (10), China guessed as Vietnam (10) and Malaysia guessed as
+Singapore (10). These are countries that look alike, neighbours or the same part of the world,
+so the model is getting confused the way a person would rather than guessing blindly.
+
 Same answer at 20 and at 50 countries: unfreezing more of the network doesn't help here, it
 just makes training slower. The ceiling for this approach on 50 countries is about 13% valid,
-6.5x better than random guessing. Next real step is either trying a different pretrained model,
-or scaling further towards all 211 countries.
+12% on unseen test photos. Next real step is either trying a different pretrained model, or
+scaling further towards all 211 countries.
 
 ## Try it on your own photo
 
