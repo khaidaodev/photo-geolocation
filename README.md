@@ -12,8 +12,9 @@ genuinely hard visual problem, way more subtle than "spot the object in the fram
 ## Where it's at right now
 
 Data pipeline's built, the 20-country problem is fully solved and understood (17.1% ceiling),
-and there's now a first real result scaling up to 50 countries. See "Results so far" for the
-full breakdown.
+and the 50-country version is settled too (13.0% valid). The question of how much of the
+network to unfreeze gave the same answer at both sizes. See "Results so far" for the full
+breakdown.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
 across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
@@ -95,9 +96,16 @@ sensible trade-off of a genuinely harder problem, not a broken setup, more count
 apart means more ways to be wrong. Took 9 hours 30 minutes, nearly double the 20-country run,
 matching the roughly 2.5x more training photos overall.
 
-Next real step is deciding whether to push further towards all 211 countries, or first try to
-recover some of that lost accuracy on 50 countries specifically (more epochs, a stronger
-pretrained model, or re-testing whether unfreezing more layers helps differently at this scale).
+**Fine-tuning, attempt 15 (ResNet50, layer3+layer4 unfrozen, 50 countries):** re-tested the
+layer3 question at the harder 50-country size, since a tie on an easier problem doesn't
+automatically carry over to a bigger one. It did. Early stopping triggered at epoch 32, best
+epoch 24, 13.0% valid, exactly the same as layer4-only. Took 12 hours 19 minutes, the longest
+run so far, for no gain at all. Layer4-only stays the setup to use at both sizes.
+
+Same answer at 20 and at 50 countries: unfreezing more of the network doesn't help here, it
+just makes training slower. The ceiling for this approach on 50 countries is about 13% valid,
+6.5x better than random guessing. Next real step is either trying a different pretrained model,
+or scaling further towards all 211 countries.
 
 ## Try it on your own photo
 
