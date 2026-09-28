@@ -3,6 +3,9 @@ Loads the best saved fine-tuned model and predicts which country a single photo 
 taken in, with a confidence score. This is where all the training work actually gets used on a
 real photo, rather than just producing an accuracy number.
 
+Prints full country names (Japan) next to the two-letter codes (JP), so the output is readable
+without having to look the codes up.
+
 Run it with:
     python src/predict.py path/to/your/photo.jpg
 """
@@ -14,6 +17,8 @@ import torch
 import torchvision
 from PIL import Image
 from torchvision import transforms
+
+from data_loading import country_name
 
 ROOT = Path(__file__).resolve().parent.parent
 MODEL_PATH = ROOT / "models" / "best_model.pt"
@@ -55,6 +60,12 @@ def predict_top_k(model, class_names, image_path: Path, k: int = 3):
     return [(class_names[i], top_probs[j].item()) for j, i in enumerate(top_indices)]
 
 
+def format_prediction(country_code: str, confidence: float) -> str:
+    """Turns one (country_code, confidence) guess into a readable line, like
+    "Japan (JP): 25.6%", so nobody has to look up what a two-letter code means."""
+    return f"{country_name(country_code)} ({country_code}): {confidence:.1%}"
+
+
 if __name__ == "__main__":
     if len(sys.argv) != 2:
         print("Usage: python src/predict.py path/to/photo.jpg")
@@ -66,4 +77,4 @@ if __name__ == "__main__":
 
     print(f"Top guesses for {image_path.name}:")
     for country_code, confidence in predictions:
-        print(f"  {country_code}: {confidence:.1%}")
+        print(f"  {format_prediction(country_code, confidence)}")

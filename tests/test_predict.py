@@ -1,7 +1,7 @@
 """
-Tests for predict.py: turning raw model scores into ranked, readable predictions, and
-correctly rebuilding a saved model from a checkpoint. Uses fake models and fake checkpoints,
-no real training or downloads needed.
+Tests for predict.py: turning raw model scores into ranked, readable predictions, rebuilding a
+saved model from a checkpoint, and showing full country names. Uses fake models and fake
+checkpoints, no real training or downloads needed.
 """
 
 import sys
@@ -72,3 +72,7 @@ def test_load_trained_model_rebuilds_correct_architecture(tmp_path):
 
     assert class_names == ["US", "GB", "FR"]
     assert model.fc.out_features == 3
+
+
+def test_format_prediction_shows_full_country_name_and_code():
+    assert predict.format_prediction("JP", 0.256) == "Japan (JP): 25.6%"

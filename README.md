@@ -120,6 +120,7 @@ scaling further towards all 211 countries.
 
 `src/predict.py` loads the best saved model and predicts the top 3 most likely countries for
 any photo you give it, with a genuine confidence percentage for each (not just a raw guess).
+Prints the full country name next to its code (Japan (JP)), not just the code on its own.
 
 ```bash
 python3 src/predict.py path/to/your/photo.jpg
