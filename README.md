@@ -113,8 +113,16 @@ so the model is getting confused the way a person would rather than guessing bli
 
 Same answer at 20 and at 50 countries: unfreezing more of the network doesn't help here, it
 just makes training slower. The ceiling for this approach on 50 countries is about 13% valid,
-12% on unseen test photos. Next real step is either trying a different pretrained model, or
-scaling further towards all 211 countries.
+12% on unseen test photos.
+
+**Fine-tuning, attempt 16 (scaling up further to 75 countries, same confirmed setup):** early
+stopping triggered at epoch 38, best epoch 30, 11.5% valid. Continues the same honest trend,
+17.1% at 20 countries, 13.0% at 50, 11.5% at 75, each one a real, expected trade-off for a
+genuinely harder problem. Still about 8.8x better than random guessing across 75 countries
+(1.3%). Took 20 hours 53 minutes, the longest run yet.
+
+Next real step is either trying a different pretrained model, or continuing to scale further
+towards all 211 countries.
 
 ## Try it on your own photo
 

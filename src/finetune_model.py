@@ -116,7 +116,7 @@ def save_checkpoint(model: nn.Module, class_names: list[str], valid_acc: float, 
 
 
 if __name__ == "__main__":
-    print("Loading train/valid splits (50 countries)...")
+    print("Loading train/valid splits (every extracted country)...")
     train_data = torchvision.datasets.ImageFolder(str(COUNTRY211_DIR / "train"), transform=TRAIN_TRANSFORM)
     valid_data = torchvision.datasets.ImageFolder(str(COUNTRY211_DIR / "valid"), transform=EVAL_TRANSFORM)
 
