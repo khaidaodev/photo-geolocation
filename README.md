@@ -121,6 +121,15 @@ stopping triggered at epoch 38, best epoch 30, 11.5% valid. Continues the same h
 genuinely harder problem. Still about 8.8x better than random guessing across 75 countries
 (1.3%). Took 20 hours 53 minutes, the longest run yet.
 
+**Final honest test-set result (75 countries):** ran the saved model against the untouched test
+split of 7,500 photos. 11.7% accuracy, matching the 11.5% validation number closely, so the
+model isn't quietly overfit to validation. Top-3 accuracy (the right country somewhere in the
+3 guesses predict.py shows) was 21.8%, top-5 was 29.1%, both around 5-7x better than random
+guessing (1.3% top-1, 4.0% top-3). The confusion matrix showed South Africa and Kenya still
+confusing each other in both directions, plus Jordan mistaken for Saudi Arabia and Bangladesh
+mistaken for India, both look-alike neighbouring pairs. China mistaken for Qatar was the one
+pairing without an obvious explanation, reported honestly rather than guessed at.
+
 Next real step is either trying a different pretrained model, or continuing to scale further
 towards all 211 countries.
 
