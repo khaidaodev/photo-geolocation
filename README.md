@@ -130,6 +130,14 @@ confusing each other in both directions, plus Jordan mistaken for Saudi Arabia a
 mistaken for India, both look-alike neighbouring pairs. China mistaken for Qatar was the one
 pairing without an obvious explanation, reported honestly rather than guessed at.
 
+**Fine-tuning, attempt 17 (scaling up to 100 countries, same confirmed setup):** early stopping
+triggered at epoch 37, best epoch 29, 11.5% valid, essentially flat against the 11.5% at 75
+countries rather than continuing the earlier drop (17.1% at 20, 13.0% at 50, 11.5% at 75). Still
+11.5x better than random guessing at this size (1.0%). Took 25 hours 51 minutes, the longest run
+yet. Whether this is a genuine plateau for this exact setup, or just how these particular 25
+added countries happened to land, isn't clear from one run, reported honestly rather than
+explained away.
+
 Next real step is either trying a different pretrained model, or continuing to scale further
 towards all 211 countries.
 
