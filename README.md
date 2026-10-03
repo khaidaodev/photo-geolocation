@@ -138,6 +138,15 @@ yet. Whether this is a genuine plateau for this exact setup, or just how these p
 added countries happened to land, isn't clear from one run, reported honestly rather than
 explained away.
 
+**Final honest test-set result (100 countries):** ran the saved model against the untouched test
+split of 10,000 photos. 11.4% accuracy, close to the 11.5% validation number, so the plateau
+seen at validation holds up on genuinely unseen photos too, not just a validation quirk. Top-3
+accuracy was 20.8%, top-5 was 27.6%, both around 7x better than random guessing (1.0% top-1,
+3.0% top-3). The confusion matrix showed Jordan still mistaken for Saudi Arabia (a repeat from
+75 countries), plus new pairs: Ecuador and Costa Rica, South Africa and Tanzania, Croatia and
+Greece, all neighbouring or visually similar regions. Nepal mistaken for Peru was the one
+pairing without an obvious shared explanation, reported honestly rather than guessed at.
+
 Next real step is either trying a different pretrained model, or continuing to scale further
 towards all 211 countries.
 
