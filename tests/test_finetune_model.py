@@ -1,12 +1,13 @@
 """
 Tests for finetune_model.py: layer freezing, augmentation setup, learning rate, best-epoch
-tracking, early stopping, and checkpoint saving.
+tracking, early stopping, checkpoint saving, and resuming an interrupted run.
 """
 
 import sys
 from pathlib import Path
 
 import torch
+import torch.nn as nn
 from torchvision import transforms
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
@@ -84,3 +85,26 @@ def test_save_checkpoint_saves_model_classes_and_accuracy(tmp_path):
     assert checkpoint["class_names"] == class_names
     assert checkpoint["valid_accuracy"] == 0.42
     assert "model_state_dict" in checkpoint
+
+
+def test_resume_checkpoint_roundtrip_saves_and_loads_everything(tmp_path):
+    model = finetune_model.build_model(num_classes=3)
+    optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=1e-5)
+    save_path = tmp_path / "resume.pt"
+
+    finetune_model.save_resume_checkpoint(
+        model, optimizer, epoch=5, valid_accuracies=[0.1, 0.12, 0.15, 0.14, 0.16],
+        class_names=["US", "GB", "FR"], path=save_path,
+    )
+    loaded = finetune_model.load_resume_checkpoint(save_path)
+
+    assert loaded["epoch"] == 5
+    assert loaded["valid_accuracies"] == [0.1, 0.12, 0.15, 0.14, 0.16]
+    assert loaded["class_names"] == ["US", "GB", "FR"]
+    assert "model_state_dict" in loaded
+    assert "optimizer_state_dict" in loaded
+
+
+def test_load_resume_checkpoint_returns_none_when_no_file_exists(tmp_path):
+    missing_path = tmp_path / "does_not_exist.pt"
+    assert finetune_model.load_resume_checkpoint(missing_path) is None

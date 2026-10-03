@@ -1,10 +1,11 @@
 """
-Fine-tuning pass on top of the frozen baseline, now scaled up from 20 to 50 countries.
+Fine-tuning pass on top of the frozen baseline, now with autosave.
 
-Thirteen attempts on the 20-country set (documented in the README) settled on ResNet50 with
-layer4 unfrozen as the confirmed best, fastest setup, 17.1% valid on 20 countries. This is the
-first run against the harder, 50-country problem, using that same confirmed setup rather than
-guessing new hyperparameters on top of a bigger dataset at the same time.
+Seventeen earlier attempts are documented in the README. This version adds a second save file,
+written after every single epoch (not just the best one), holding the model, the optimizer's
+internal state, and the full accuracy history so far. If the run gets interrupted (a crash, the
+Mac sleeping, the project folder moving mid-run, which just happened), restarting the script
+picks training back up from the last completed epoch instead of starting over from epoch 1.
 
 Run it with:
     python src/finetune_model.py
@@ -26,6 +27,7 @@ ssl._create_default_https_context = lambda: ssl.create_default_context(cafile=ce
 ROOT = Path(__file__).resolve().parent.parent
 COUNTRY211_DIR = ROOT / "data" / "raw" / "country211"
 MODEL_PATH = ROOT / "models" / "best_model.pt"
+RESUME_PATH = ROOT / "models" / "resume_checkpoint.pt"
 
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
@@ -50,10 +52,10 @@ EVAL_TRANSFORM = transforms.Compose([
 
 
 def build_model(num_classes: int) -> nn.Module:
-    """Pretrained ResNet50 with everything frozen except the last block (layer4) and a fresh
-    final layer sized for our number of countries. Confirmed best, fastest setup from the
-    20-country experiments, now tested against the harder 50-country problem."""
-    model = torchvision.models.resnet50(weights=torchvision.models.ResNet50_Weights.DEFAULT)
+    """Pretrained ResNet101 with everything frozen except the last block (layer4) and a fresh
+    final layer sized for our number of countries. Testing whether a deeper model than
+    ResNet50 can break past the ~11.5% plateau found at 75 and 100 countries."""
+    model = torchvision.models.resnet101(weights=torchvision.models.ResNet101_Weights.DEFAULT)
     for param in model.parameters():
         param.requires_grad = False
     for param in model.layer4.parameters():
@@ -106,13 +108,37 @@ def should_stop_early(valid_accuracies: list[float], patience: int) -> bool:
 def save_checkpoint(model: nn.Module, class_names: list[str], valid_acc: float, path: Path):
     """Saves the model's weights alongside the country codes it was trained on and how well it
     did, so a prediction script can later load it and know both how to use it and how much to
-    trust it."""
+    trust it. This is the best-so-far save, only overwritten when a new best epoch happens."""
     path.parent.mkdir(parents=True, exist_ok=True)
     torch.save({
         "model_state_dict": model.state_dict(),
         "class_names": class_names,
         "valid_accuracy": valid_acc,
     }, path)
+
+
+def save_resume_checkpoint(model, optimizer, epoch: int, valid_accuracies: list[float],
+                            class_names: list[str], path: Path):
+    """Saves everything needed to pick training back up from exactly where it left off: which
+    epoch just finished, the model's current weights, the optimizer's own internal state, and
+    every validation accuracy seen so far. Written after every single epoch, an autosave
+    rather than only saving at the very end."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    torch.save({
+        "epoch": epoch,
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "valid_accuracies": valid_accuracies,
+        "class_names": class_names,
+    }, path)
+
+
+def load_resume_checkpoint(path: Path):
+    """Loads a resume checkpoint if one exists, returning everything needed to continue
+    training. Returns None if there's nothing to resume from, meaning this is a fresh start."""
+    if not path.exists():
+        return None
+    return torch.load(path, map_location="cpu", weights_only=False)
 
 
 if __name__ == "__main__":
@@ -123,18 +149,31 @@ if __name__ == "__main__":
     train_loader = DataLoader(train_data, batch_size=32, shuffle=True)
     valid_loader = DataLoader(valid_data, batch_size=32, shuffle=False)
 
-    print(f"Building model (ResNet50, last block unfrozen, lr={LEARNING_RATE}, {len(train_data.classes)} classes)...")
+    print(f"Building model (ResNet101, last block unfrozen, lr={LEARNING_RATE}, {len(train_data.classes)} classes)...")
     model = build_model(num_classes=len(train_data.classes))
 
     criterion = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(filter(lambda p: p.requires_grad, model.parameters()), lr=LEARNING_RATE)
 
+    start_epoch = 1
     valid_accuracies = []
-    for epoch in range(1, MAX_EPOCHS + 1):
+
+    resume_data = load_resume_checkpoint(RESUME_PATH)
+    if resume_data is not None:
+        model.load_state_dict(resume_data["model_state_dict"])
+        optimizer.load_state_dict(resume_data["optimizer_state_dict"])
+        valid_accuracies = resume_data["valid_accuracies"]
+        start_epoch = resume_data["epoch"] + 1
+        print(f"Found a resume checkpoint, continuing from epoch {start_epoch} "
+              f"({len(valid_accuracies)} epochs already done).")
+
+    for epoch in range(start_epoch, MAX_EPOCHS + 1):
         train_loss, train_acc = run_epoch(model, train_loader, criterion, optimizer)
         valid_loss, valid_acc = run_epoch(model, valid_loader, criterion)
         valid_accuracies.append(valid_acc)
         print(f"Epoch {epoch}/{MAX_EPOCHS}: train acc {train_acc:.1%}, valid acc {valid_acc:.1%}")
+
+        save_resume_checkpoint(model, optimizer, epoch, valid_accuracies, train_data.classes, RESUME_PATH)
 
         if valid_acc == max(valid_accuracies):
             save_checkpoint(model, train_data.classes, valid_acc, MODEL_PATH)
@@ -145,5 +184,8 @@ if __name__ == "__main__":
 
     epoch_num, best_acc = best_epoch(valid_accuracies)
     print(f"Best epoch: {epoch_num}/{len(valid_accuracies)}, valid acc {best_acc:.1%}")
-    print("Confirmed 20-country ceiling for comparison: 17.1% valid.")
-    print(f"(random guessing across {len(train_data.classes)} countries would be {1 / len(train_data.classes):.1%})")
+    print("ResNet50 ceiling for comparison (75 and 100 countries): ~11.5% valid.")
+
+    if RESUME_PATH.exists():
+        RESUME_PATH.unlink()
+        print("Training finished cleanly, resume checkpoint removed.")
