@@ -159,8 +159,16 @@ accuracy was 20.8%, top-5 was 27.6%, both around 7x better than random guessing 
 Greece, all neighbouring or visually similar regions. Nepal mistaken for Peru was the one
 pairing without an obvious shared explanation, reported honestly rather than guessed at.
 
-Next real step is either trying a different pretrained model, or continuing to scale further
-towards all 211 countries.
+**Fine-tuning, attempt 19 (ResNet101 instead of ResNet50, 100 countries, same setup):** the
+second go at this, after the first one crashed at epoch 15 when the project folder moved. Early
+stopping triggered at epoch 36, best epoch 28, 11.8% valid, against 11.5% for ResNet50 at the
+same size. That is a gap of 0.3 points from a single run each, small enough to be run-to-run
+randomness (the photos get shuffled and augmented differently every time), so this does not
+show the deeper model is any better. It did take 48 hours 54 minutes, nearly double the 25 hours
+51 minutes ResNet50 needed, so the deeper model cost a lot more time and gave no clear gain.
+
+Next real step is checking the ResNet101 model on the untouched test split, then deciding
+whether to keep scaling towards all 211 countries or try something other than a bigger ResNet.
 
 ## Try it on your own photo
 
