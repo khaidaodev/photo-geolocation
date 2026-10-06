@@ -15,6 +15,8 @@ import torchvision
 from torch.utils.data import DataLoader
 from torchvision import transforms
 
+from model_loading import build_resnet
+
 ROOT = Path(__file__).resolve().parent.parent
 COUNTRY211_DIR = ROOT / "data" / "raw" / "country211"
 MODEL_PATH = ROOT / "models" / "best_model.pt"
@@ -32,8 +34,7 @@ def load_trained_model(path: Path):
     checkpoint = torch.load(path, map_location="cpu", weights_only=False)
     class_names = checkpoint["class_names"]
 
-    model = torchvision.models.resnet50(weights=None)
-    model.fc = torch.nn.Linear(model.fc.in_features, len(class_names))
+    model = build_resnet(checkpoint["model_state_dict"], len(class_names))
     model.load_state_dict(checkpoint["model_state_dict"])
     model.eval()
 
