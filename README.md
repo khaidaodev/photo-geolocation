@@ -167,8 +167,23 @@ randomness (the photos get shuffled and augmented differently every time), so th
 show the deeper model is any better. It did take 48 hours 54 minutes, nearly double the 25 hours
 51 minutes ResNet50 needed, so the deeper model cost a lot more time and gave no clear gain.
 
-Next real step is checking the ResNet101 model on the untouched test split, then deciding
-whether to keep scaling towards all 211 countries or try something other than a bigger ResNet.
+**Final honest test-set result (100 countries, ResNet101):** ran the saved ResNet101 model
+against the untouched test split of 10,000 photos. 11.3% accuracy, a tie with ResNet50's 11.4%
+on the same photos, and 0.5 points under its 11.8% valid score, so it isn't quietly tuned to
+the validation photos. Top-3 accuracy was 20.9% and top-5 was 27.7% (ResNet50 got 20.8% and
+27.6%), about 7x better than random guessing at top-3 (3.0%). The confusion matrix showed
+Jordan guessed as Saudi Arabia 14 times, Ecuador guessed as Costa Rica 11 times, Uganda guessed
+as Ghana 10 times, Bahamas guessed as Barbados 9 times and Switzerland guessed as Austria 9
+times. Jordan and Saudi Arabia, and Ecuador and Costa Rica, were also ResNet50's top two
+mix-ups, so two different networks get tripped up by the same look-alike pairs. The scripts
+now work out which ResNet a saved model needs, so they load either one. The confusion matrix
+took 46 minutes 1 second and the top-3 numbers 29 minutes 36 seconds, against 18 minutes 41
+seconds and 17 minutes 25 seconds for ResNet50.
+
+The picture is the same at 75 and 100 countries, and with ResNet50 and ResNet101: about 11.5%
+valid and 11.3 to 11.4% on the test split. A bigger ResNet isn't what's holding it back. Next
+real step is either scaling further towards all 211 countries, or trying a model trained a
+different way, like CLIP, instead of another bigger ResNet.
 
 ## Try it on your own photo
 
