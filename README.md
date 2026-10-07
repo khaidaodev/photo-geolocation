@@ -181,9 +181,30 @@ took 46 minutes 1 second and the top-3 numbers 29 minutes 36 seconds, against 18
 seconds and 17 minutes 25 seconds for ResNet50.
 
 The picture is the same at 75 and 100 countries, and with ResNet50 and ResNet101: about 11.5%
-valid and 11.3 to 11.4% on the test split. A bigger ResNet isn't what's holding it back. Next
-real step is either scaling further towards all 211 countries, or trying a model trained a
-different way, like CLIP, instead of another bigger ResNet.
+valid and 11.3 to 11.4% on the test split. A bigger ResNet isn't what's holding it back.
+
+**CLIP as a different starting point (100 countries):** every model so far started from a
+ResNet, which learned by sorting about a million photos into 1,000 labelled boxes. CLIP was
+trained on hundreds of millions of photos paired with captions, and captions often say where a
+photo was taken, so I tried it instead. CLIP stays completely frozen, no fine-tuning at all.
+Every photo goes through it once, the 512 numbers it gives back are saved, and a plain logistic
+regression on top guesses the country. The regularisation strength C was picked on the valid
+split (C=1 gave 24.9%, C=10 gave 26.6%, C=100 gave 23.5%) and the test split was only used once,
+at the end. Result on the 10,000 untouched test photos: 26.1% accuracy, against 11.4% for
+ResNet50 and 11.3% for ResNet101, and about 26x better than random guessing (1.0%). Top-3 was
+42.8% and top-5 was 51.8%, against 20.8% to 20.9% and 27.6% to 27.7% for the two ResNets. The
+whole thing took 6 minutes 25 seconds, against 25 hours 51 minutes and 48 hours 54 minutes of
+training for the two ResNets.
+
+This is one run of each, but the gap is far bigger than the 0.3 point difference between the
+two ResNets. It doesn't tell me why CLIP wins. The captions, the amount of training data, or
+CLIP being a different kind of network could each be the reason. I also haven't checked
+whether any of these photos were in CLIP's own training data, and Country211 was built by
+OpenAI to test CLIP, so that's worth keeping in mind.
+
+Next real step is running CLIP on all 211 countries, since that was the plan from the start,
+and trying zero-shot (asking CLIP to match each photo against sentences like 'a photo taken in
+Japan', with no training at all) to see how much of the score is what CLIP already knew.
 
 ## Try it on your own photo
 
