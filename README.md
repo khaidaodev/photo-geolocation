@@ -202,9 +202,25 @@ CLIP being a different kind of network could each be the reason. I also haven't 
 whether any of these photos were in CLIP's own training data, and Country211 was built by
 OpenAI to test CLIP, so that's worth keeping in mind.
 
-Next real step is running CLIP on all 211 countries, since that was the plan from the start,
-and trying zero-shot (asking CLIP to match each photo against sentences like 'a photo taken in
-Japan', with no training at all) to see how much of the score is what CLIP already knew.
+**CLIP on all 211 countries:** same setup as the 100-country run and no code changes, I just
+unpacked the other 111 country folders from the archive I already had. That's 31,650 train
+photos, 10,550 valid and 21,100 test. C=10 won again on the valid split (C=1 gave 22.5%, C=10
+gave 26.9%, C=100 gave 24.1%). Result on the 21,100 untouched test photos: 25.9% accuracy,
+41.9% top-3 and 50.1% top-5. Random guessing across 211 countries gets 0.5% for top 1 and 1.4%
+for top 3, so that's about 55x and 29x better.
+
+Going from 100 countries to 211 barely moved CLIP. Its test accuracy went from 26.1% to 25.9%,
+its top-5 from 51.8% to 50.1%, and its valid score from 26.6% to 26.9%. The ResNets' valid
+scores fell as countries were added, 17.1% at 20 countries, 13.0% at 50 and 11.5% at 75, then
+stayed flat at 11.5% at 100. I only ran CLIP at 100 and 211, so two points aren't a trend. The
+ResNets were never run at 211, so it isn't a like for like comparison, but CLIP on the harder
+211-country problem still beats both ResNets on the 100-country one (11.4% and 11.3%). The test
+score is 1.0 point under the valid score, which is normal because the valid score is the best of
+three tries. One run, and it took 14 minutes 32 seconds for all 63,300 photos.
+
+Next real step is zero-shot (asking CLIP to match each photo against sentences like 'a photo
+taken in Japan', with no training at all) to see how much of the score is what CLIP already
+knew.
 
 ## Try it on your own photo
 
