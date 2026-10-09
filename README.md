@@ -218,9 +218,28 @@ ResNets were never run at 211, so it isn't a like for like comparison, but CLIP 
 score is 1.0 point under the valid score, which is normal because the valid score is the best of
 three tries. One run, and it took 14 minutes 32 seconds for all 63,300 photos.
 
-Next real step is zero-shot (asking CLIP to match each photo against sentences like 'a photo
-taken in Japan', with no training at all) to see how much of the score is what CLIP already
-knew.
+**Zero-shot CLIP, with no training at all (211 countries):** CLIP has two halves that were
+trained together, one that turns a photo into 512 numbers and one that turns a sentence into 512
+numbers, so a photo and a caption that fits it end up with similar numbers. I wrote one sentence
+per country, 'a photo taken in Japan' and so on, turned each one into numbers with the text
+half, and for every photo picked the country whose sentence sat closest. The photo numbers are
+the ones saved from the 211-country run, so no photos were processed again and nothing was
+trained. I chose the wording before running it and didn't change it afterwards. Result on the
+21,100 untouched test photos: 16.3% top 1, 30.6% top 3 and 39.0% top 5, against 0.5% and 1.4%
+for random guessing, so about 34x and 21x better. The whole run took 7.7 seconds.
+
+Compared with the trained version at 25.9%, my 31,650 training photos added about 9.6 points,
+and CLIP already had about 63% of the final score from its own training. It also beats the two
+ResNets (11.4% and 11.3%), though those were tested on 100 countries, not 211, so it isn't a
+like for like comparison.
+
+A few things to keep in mind. The country names come from pycountry, and a few read oddly as a
+sentence, like 'Virgin Islands, British' and 'Holy See (Vatican City State)'. I haven't measured
+how much that costs. Country211 was built by OpenAI to test CLIP, and zero-shot is the way they
+test it, and I haven't checked whether any of these photos were in CLIP's own training data.
+
+Next real step is working out how that 25.9% is spread across the 211 countries, since an
+average can hide a lot.
 
 ## Try it on your own photo
 
