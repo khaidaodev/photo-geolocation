@@ -238,8 +238,31 @@ sentence, like 'Virgin Islands, British' and 'Holy See (Vatican City State)'. I 
 how much that costs. Country211 was built by OpenAI to test CLIP, and zero-shot is the way they
 test it, and I haven't checked whether any of these photos were in CLIP's own training data.
 
-Next real step is working out how that 25.9% is spread across the 211 countries, since an
-average can hide a lot.
+**How the 25.9% is spread across the 211 countries:** an average can hide a lot, so I worked
+out CLIP's accuracy for each country on its own. The classifier wasn't saved from the earlier
+run, so I trained it again from the saved photo numbers with the same C (10), and the overall
+test accuracy came out at 25.9% again, which is the check that nothing was wired wrong. Each
+country has 100 test photos, so each score is a fraction out of 100.
+
+The score is spread out, not carried by a few easy countries. The middle country scored 22%, no
+country scored exactly 0%, 16 of the 211 scored 50% or more and 18 scored under 10%, which
+leaves 177 in between. Even the lowest, at 4%, is about 8x random guessing (0.5%).
+
+Best 10: Panama 79%, Jordan 61%, Greenland 60%, Faroe Islands 59%, Antarctica 57%, North Korea
+57%, San Marino 57%, Bhutan 56%, Liechtenstein 56%, South Georgia and the South Sandwich Islands
+55%. Worst 10: Austria 4%, Chile 4%, Germany 4%, Colombia 5%, Mozambique 5%, Poland 5%, Romania
+5%, Tanzania 6%, Bulgaria 7%, Ghana 7%.
+
+My reading is that the best ones are mostly small or remote places with a distinctive look, and
+the worst are mostly bigger countries with look-alike neighbours. That's a guess from the lists,
+I haven't looked at any photos. Because each country only has 100 test photos, a score can move
+by several points on a different 100, so the pattern is more trustworthy than the exact order
+of two close countries (Austria, Chile and Germany at 4% can't be told apart from Colombia at
+5%). A few of the 211 are territories, not countries, like Antarctica, Greenland and the Faroe
+Islands. It took 9.4 seconds.
+
+Next real step is looking at where the wrong guesses go, to see whether the low scorers really
+are mixed up with their neighbours.
 
 ## Try it on your own photo
 
