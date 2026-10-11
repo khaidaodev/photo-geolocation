@@ -261,8 +261,37 @@ of two close countries (Austria, Chile and Germany at 4% can't be told apart fro
 5%). A few of the 211 are territories, not countries, like Antarctica, Greenland and the Faroe
 Islands. It took 9.4 seconds.
 
-Next real step is looking at where the wrong guesses go, to see whether the low scorers really
-are mixed up with their neighbours.
+**Where CLIP's wrong guesses go (211 countries):** the per-country scores showed which countries
+do badly, but not what their photos get guessed as, so I looked at that. Same setup as before:
+the classifier trained again from the saved photo numbers (C=10), and the overall test accuracy
+came out at 25.9% again. Each country has 100 test photos, so a count of 3 or 4 is weak
+evidence and a count of 20 is not.
+
+The 15 most common mix-ups are mostly twins or places in the same area: Jersey guessed as
+Guernsey (21 times), Namibia as Botswana (19), South Georgia and the South Sandwich Islands as
+the Falkland Islands (17) and the Falklands back as South Georgia (15), Svalbard and Jan Mayen
+as Greenland (16), the British Virgin Islands as the US Virgin Islands (16), Burkina Faso as
+Mali (13), India as Bangladesh (13), Afghanistan as Tajikistan (12), Bhutan as Nepal (12),
+Botswana as Namibia (12), Switzerland as Liechtenstein (12), Italy as the Holy See (12), Kenya
+as Botswana (12) and Kyrgyzstan as Tajikistan (12). Kenya as Botswana is the one that doesn't
+fit the neighbour idea, those two don't share a border.
+
+For the low scorers, the photos mostly went to small or nearby countries. Austria (4 of 100
+right) went to Liechtenstein (8), Andorra (7) and Slovenia (6). Germany (4 right) went to
+Liechtenstein (7), Luxembourg (7) and the Netherlands (7). Poland (5 right) went to Czechia (6),
+Slovakia (5) and the Åland Islands (4). Romania (5 right) went to Belarus (5), Andorra (4) and
+Slovakia (4). Bulgaria (7 right) went to Andorra (6), Albania (5) and Belarus (4). Chile (4
+right) went to Mexico (5), Argentina (3) and Poland (3). Colombia (5 right) went to Mexico (4),
+Costa Rica (3) and Guatemala (3).
+
+So my guess from the last section held up for most of them, the mistakes are mostly look-alike
+neighbours. Some have no obvious reason, like Andorra showing up for Austria, Romania and
+Bulgaria, and Mexico showing up for Chile and Colombia, and I haven't looked at the photos to
+find out why. It could be that the small countries pick up a lot of loose guesses, but I
+haven't tested that. It took 8.1 seconds.
+
+Next real step is a CLIP version of predict.py, so a photo can be guessed with the best setup
+instead of the ResNet one.
 
 ## Try it on your own photo
 
