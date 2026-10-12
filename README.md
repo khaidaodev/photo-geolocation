@@ -290,8 +290,17 @@ Bulgaria, and Mexico showing up for Chile and Colombia, and I haven't looked at 
 find out why. It could be that the small countries pick up a lot of loose guesses, but I
 haven't tested that. It took 8.1 seconds.
 
-Next real step is a CLIP version of predict.py, so a photo can be guessed with the best setup
-instead of the ResNet one.
+**Guessing a photo with CLIP:** clip_predict.py is the CLIP version of predict.py. I run it
+once with `train`, which trains the classifier again from the saved photo numbers (C=10) and
+saves it to models/clip_classifier.joblib. That folder is git-ignored, like the other model
+files. The test accuracy it prints for the saved classifier is 25.9% on all 211 countries, the
+same as clip_probe.py, so the saved one is the right one. After that I give it a photo and it
+prints the top 3 guesses.
+
+I tried it on a photo I saved as japan.png: Japan 98.1%, South Korea 1.4%, Taiwan 0.2%. That is
+one photo, so it's a demo and not a score. The 25.9% is the real number.
+
+Next real step is checking whether the wording of the zero-shot sentence changes anything.
 
 ## Try it on your own photo
 
