@@ -300,7 +300,20 @@ prints the top 3 guesses.
 I tried it on a photo I saved as japan.png: Japan 98.1%, South Korea 1.4%, Taiwan 0.2%. That is
 one photo, so it's a demo and not a score. The 25.9% is the real number.
 
-Next real step is checking whether the wording of the zero-shot sentence changes anything.
+**Does the wording of the zero-shot sentence matter?** I picked "a photo taken in {}" up front
+and never tuned it, so I tried five wordings and an average of all five, still with no training
+and still on the ViT-B-32 numbers. I picked the best one on the valid photos and only then looked
+at the test photos, once. On valid: "a photo taken in {}" 17.1%, "a photo of {}" 15.9%, "a photo
+from {}" 17.1%, "a photo of a place in {}" 16.5%, the bare country name 14.9%, and all five
+averaged 17.1%. Three tied at the top and the script picked the averaged one.
+
+On the test photos the averaged wordings got 16.5% top 1, 30.8% top 3 and 39.3% top 5. The
+original wording got 16.3%, 30.6% and 39.0%. That is 0.2 points better at top 1 and top 3 and 0.3
+at top 5. With 21,100 test photos, luck alone can move a score by about 0.3 points, so I'm not
+calling this an improvement. The wording doesn't seem to matter much, and the only one that did
+clearly worse on valid was the bare country name. It took 19.0 seconds.
+
+Next real step is trying a bigger CLIP model, ViT-B-16, in place of ViT-B-32, and seeing if the score moves.
 
 ## Try it on your own photo
 
