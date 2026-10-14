@@ -130,18 +130,6 @@ confusing each other in both directions, plus Jordan mistaken for Saudi Arabia a
 mistaken for India, both look-alike neighbouring pairs. China mistaken for Qatar was the one
 pairing without an obvious explanation, reported honestly rather than guessed at.
 
-**Project folder moved** from \`~/Downloads/photo-geolocation\` to
-\`~/Downloads/github projects/photo-geolocation\`, part of organising all the GitHub projects
-together. Caused a crash partway through the first ResNet101 attempt (training had saved photo
-locations from the old folder, which stopped existing mid-run). Led directly to the autosave
-feature below, so a repeat of this never costs hours of training again.
-
-**Fine-tuning, attempt 18 (autosave added):** training now saves a full resume checkpoint after
-every single epoch, not just the best one, model weights, optimizer state, and the accuracy
-history so far. If a run gets interrupted (a crash, the Mac sleeping, the folder moving), it
-picks back up from the last completed epoch instead of starting over from epoch 1. 2 new tests
-cover the save and load logic directly, no real training needed to test it.
-
 **Fine-tuning, attempt 17 (scaling up to 100 countries, same confirmed setup):** early stopping
 triggered at epoch 37, best epoch 29, 11.5% valid, essentially flat against the 11.5% at 75
 countries rather than continuing the earlier drop (17.1% at 20, 13.0% at 50, 11.5% at 75). Still
@@ -158,6 +146,18 @@ accuracy was 20.8%, top-5 was 27.6%, both around 7x better than random guessing 
 75 countries), plus new pairs: Ecuador and Costa Rica, South Africa and Tanzania, Croatia and
 Greece, all neighbouring or visually similar regions. Nepal mistaken for Peru was the one
 pairing without an obvious shared explanation, reported honestly rather than guessed at.
+
+**Project folder moved** from `~/Downloads/photo-geolocation` to
+`~/Downloads/github projects/photo-geolocation`, part of organising all the GitHub projects
+together. Caused a crash partway through the first ResNet101 attempt (training had saved photo
+locations from the old folder, which stopped existing mid-run). Led directly to the autosave
+feature below, so a repeat of this never costs hours of training again.
+
+**Fine-tuning, attempt 18 (autosave added):** training now saves a full resume checkpoint after
+every single epoch, not just the best one, model weights, optimizer state, and the accuracy
+history so far. If a run gets interrupted (a crash, the Mac sleeping, the folder moving), it
+picks back up from the last completed epoch instead of starting over from epoch 1. 2 new tests
+cover the save and load logic directly, no real training needed to test it.
 
 **Fine-tuning, attempt 19 (ResNet101 instead of ResNet50, 100 countries, same setup):** the
 second go at this, after the first one crashed at epoch 15 when the project folder moved. Early
