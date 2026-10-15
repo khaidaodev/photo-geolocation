@@ -7,7 +7,7 @@ no filename hints, just pixels.
 
 Basically what GeoGuessr is built on, road markings, plants, architecture, which side of the
 road cars drive on, even power line poles, all give away roughly where a photo's from. It's a
-genuinely hard visual problem, way more subtle than "spot the object in the frame."
+really hard visual problem, way more subtle than "spot the object in the frame."
 
 ## Where it's at right now
 
@@ -66,17 +66,17 @@ epoch 34, 17.1% valid, the confirmed plateau for this setup. Took 5 hours 17 min
 
 **Fine-tuning, attempt 11 (ResNet50, layer3+layer4 both unfrozen, capped at 15 epochs as a
 quick first look):** 16.5% valid at epoch 14, still climbing when the run hit its cap. Left
-genuinely inconclusive at the time.
+inconclusive at the time.
 
 **Fine-tuning, attempt 12 (ResNet50, layer4-only, 20 epochs, with model saving added):** 16.7%
 valid at epoch 17. Broadly consistent with the confirmed 17.1% ceiling from attempt 10. Best
 model saved to `models/best_model.pt`.
 
-**Final honest test-set result (20 countries):** ran the saved model against the untouched test
+**Final test-set result (20 countries):** ran the saved model against the untouched test
 split, never used anywhere else in this project. 16.0% accuracy, close to the 16.7% validation
 number from the same run. A confusion matrix surfaced the most common mistakes: Thailand
 guessed as South Korea, Japan guessed as South Korea, Australia guessed as South Africa, India
-and the US both sometimes guessed as South Africa, all genuine regional visual overlap rather
+and the US both sometimes guessed as South Africa, all regional visual overlap rather
 than random error.
 
 **Fine-tuning, attempt 13 (ResNet50, layer3+layer4 unfrozen, properly uncapped, up to 60
@@ -86,13 +86,13 @@ overnight since 5+ hours was too long to sit and wait for. Layer4-only stays the
 since it trains faster for the same result, no reason to unfreeze more of the network here.
 
 The 20-country problem is fully solved and understood at this point: ResNet50, layer4-only,
-around 17% valid, 16% on genuinely unseen test data.
+around 17% valid, 16% on unseen test data.
 
 **Fine-tuning, attempt 14 (scaling up to 50 countries, same confirmed 20-country setup, no
 new hyperparameters guessed on top of a bigger dataset at the same time):** early stopping
 triggered at epoch 31, best epoch 23, 13.0% valid. Down from the 17.1% ceiling on 20 countries,
 but still 6.5x better than random guessing across 50 countries (2.0%). This is the expected,
-sensible trade-off of a genuinely harder problem, not a broken setup, more countries to tell
+sensible trade-off of a harder problem, not a broken setup, more countries to tell
 apart means more ways to be wrong. Took 9 hours 30 minutes, nearly double the 20-country run,
 matching the roughly 2.5x more training photos overall.
 
@@ -102,7 +102,7 @@ automatically carry over to a bigger one. It did. Early stopping triggered at ep
 epoch 24, 13.0% valid, exactly the same as layer4-only. Took 12 hours 19 minutes, the longest
 run so far, for no gain at all. Layer4-only stays the setup to use at both sizes.
 
-**Final honest test-set result (50 countries):** ran the saved model (the one from attempt 15,
+**Final test-set result (50 countries):** ran the saved model (the one from attempt 15,
 which tied layer4-only at 13.0%) against the untouched test split of 5,000 photos. 12.1%
 accuracy, close to the 13.0% validation number, so the model isn't quietly overfit to the
 validation photos. About 6x better than random guessing (2.0%). Took about 7 minutes. The most
@@ -116,36 +116,36 @@ just makes training slower. The ceiling for this approach on 50 countries is abo
 12% on unseen test photos.
 
 **Fine-tuning, attempt 16 (scaling up further to 75 countries, same confirmed setup):** early
-stopping triggered at epoch 38, best epoch 30, 11.5% valid. Continues the same honest trend,
-17.1% at 20 countries, 13.0% at 50, 11.5% at 75, each one a real, expected trade-off for a
-genuinely harder problem. Still about 8.8x better than random guessing across 75 countries
+stopping triggered at epoch 38, best epoch 30, 11.5% valid. Same trend again,
+17.1% at 20 countries, 13.0% at 50, 11.5% at 75, each one an expected trade-off for a
+harder problem. Still about 8.8x better than random guessing across 75 countries
 (1.3%). Took 20 hours 53 minutes, the longest run yet.
 
-**Final honest test-set result (75 countries):** ran the saved model against the untouched test
+**Final test-set result (75 countries):** ran the saved model against the untouched test
 split of 7,500 photos. 11.7% accuracy, matching the 11.5% validation number closely, so the
 model isn't quietly overfit to validation. Top-3 accuracy (the right country somewhere in the
 3 guesses predict.py shows) was 21.8%, top-5 was 29.1%, both around 5-7x better than random
 guessing (1.3% top-1, 4.0% top-3). The confusion matrix showed South Africa and Kenya still
 confusing each other in both directions, plus Jordan mistaken for Saudi Arabia and Bangladesh
 mistaken for India, both look-alike neighbouring pairs. China mistaken for Qatar was the one
-pairing without an obvious explanation, reported honestly rather than guessed at.
+pairing without an obvious explanation, so I've left it unexplained.
 
 **Fine-tuning, attempt 17 (scaling up to 100 countries, same confirmed setup):** early stopping
 triggered at epoch 37, best epoch 29, 11.5% valid, essentially flat against the 11.5% at 75
 countries rather than continuing the earlier drop (17.1% at 20, 13.0% at 50, 11.5% at 75). Still
 11.5x better than random guessing at this size (1.0%). Took 25 hours 51 minutes, the longest run
-yet. Whether this is a genuine plateau for this exact setup, or just how these particular 25
-added countries happened to land, isn't clear from one run, reported honestly rather than
-explained away.
+yet. Whether this is a real plateau for this exact setup, or just how these particular 25
+added countries happened to land, isn't clear from one run, so I'm not going to
+explain it away.
 
-**Final honest test-set result (100 countries):** ran the saved model against the untouched test
+**Final test-set result (100 countries):** ran the saved model against the untouched test
 split of 10,000 photos. 11.4% accuracy, close to the 11.5% validation number, so the plateau
-seen at validation holds up on genuinely unseen photos too, not just a validation quirk. Top-3
+seen at validation holds up on unseen photos too, not just a validation quirk. Top-3
 accuracy was 20.8%, top-5 was 27.6%, both around 7x better than random guessing (1.0% top-1,
 3.0% top-3). The confusion matrix showed Jordan still mistaken for Saudi Arabia (a repeat from
 75 countries), plus new pairs: Ecuador and Costa Rica, South Africa and Tanzania, Croatia and
 Greece, all neighbouring or visually similar regions. Nepal mistaken for Peru was the one
-pairing without an obvious shared explanation, reported honestly rather than guessed at.
+pairing without an obvious shared explanation, so I've left it unexplained.
 
 **Project folder moved** from `~/Downloads/photo-geolocation` to
 `~/Downloads/github projects/photo-geolocation`, part of organising all the GitHub projects
@@ -167,7 +167,7 @@ randomness (the photos get shuffled and augmented differently every time), so th
 show the deeper model is any better. It did take 48 hours 54 minutes, nearly double the 25 hours
 51 minutes ResNet50 needed, so the deeper model cost a lot more time and gave no clear gain.
 
-**Final honest test-set result (100 countries, ResNet101):** ran the saved ResNet101 model
+**Final test-set result (100 countries, ResNet101):** ran the saved ResNet101 model
 against the untouched test split of 10,000 photos. 11.3% accuracy, a tie with ResNet50's 11.4%
 on the same photos, and 0.5 points under its 11.8% valid score, so it isn't quietly tuned to
 the validation photos. Top-3 accuracy was 20.9% and top-5 was 27.7% (ResNet50 got 20.8% and
@@ -318,14 +318,14 @@ Next real step is trying a bigger CLIP model, ViT-B-16, in place of ViT-B-32, an
 ## Try it on your own photo
 
 `src/predict.py` loads the best saved model and predicts the top 3 most likely countries for
-any photo you give it, with a genuine confidence percentage for each (not just a raw guess).
+any photo you give it, with a confidence percentage for each (not just a raw guess).
 Prints the full country name next to its code (Japan (JP)), not just the code on its own.
 
 **How good are those top 3 guesses, really?** Measured properly against the untouched test
 split (50 countries): the right country was the single best guess 12.1% of the time, somewhere
 in the top 3 guesses 23.4% of the time, and in the top 5 guesses 31.2% of the time. Random
 guessing across 50 countries would get 2.0% for the top guess and 6.0% for the top 3, so the
-model's three guesses do genuinely capture the right answer far more often than one guess
+model's three guesses do capture the right answer far more often than one guess
 alone, even when its single best pick is wrong. Fits the earlier confusion matrix, the right
 answer is often sitting just behind a look-alike country the model picked first. Took 9 minutes
 28 seconds on the test split's 5,000 photos.
@@ -362,7 +362,7 @@ the best version to `models/best_model.pt` as it trains. Stops itself automatica
 validation accuracy plateaus. With ResNet50 and more countries, expect real training runs to
 take many hours, sometimes overnight, on a CPU.
 
-Last script runs the saved model against the untouched test split for an honest final accuracy
+Last script runs the saved model against the untouched test split for a final accuracy
 number, plus prints the most commonly confused country pairs.
 
 ## Testing and git
