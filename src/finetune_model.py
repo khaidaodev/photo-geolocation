@@ -8,7 +8,7 @@ Mac sleeping, the project folder moving mid-run, which just happened), restartin
 picks training back up from the last completed epoch instead of starting over from epoch 1.
 
 Run it with:
-    python src/finetune_model.py
+    python3 src/finetune_model.py
 """
 
 import ssl

@@ -6,7 +6,7 @@ measures how well those three guesses actually do.
 Uses the test split, which was never used in training or for picking the best epoch.
 
 Run it with:
-    python src/top_k_accuracy.py
+    python3 src/top_k_accuracy.py
 """
 
 import torch

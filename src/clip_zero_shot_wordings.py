@@ -11,7 +11,7 @@ Like clip_zero_shot.py, nothing is trained and no photos get processed again: th
 come from the files clip_probe.py saved.
 
 Run it with:
-    python src/clip_zero_shot_wordings.py
+    python3 src/clip_zero_shot_wordings.py
 """
 
 import numpy as np

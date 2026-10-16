@@ -13,7 +13,7 @@ The sentence wording is fixed up front and not tuned, so a better wording could 
 and this is closer to a floor than a ceiling.
 
 Run it with:
-    python src/clip_zero_shot.py
+    python3 src/clip_zero_shot.py
 """
 
 import numpy as np

@@ -1,10 +1,10 @@
 """
-Guesses which country a photo was taken in using CLIP plus a trained classifier, the best setup
-so far (25.9% on all 211 countries). It's the CLIP version of predict.py.
+Guesses which country a photo was taken in using CLIP plus a trained classifier, the ViT-B-32 setup
+(25.9% on all 211 countries). It's the CLIP version of predict.py.
 
 Two steps, run in this order:
-    python src/clip_predict.py train                  (once, makes and saves the classifier)
-    python src/clip_predict.py path/to/photo.jpg      (guesses a photo)
+    python3 src/clip_predict.py train                  (once, makes and saves the classifier)
+    python3 src/clip_predict.py path/to/photo.jpg      (guesses a photo)
 
 The train step needs the CLIP photo numbers that clip_probe.py saves, so run that first. The
 saved classifier goes in models/, which git ignores, like the other model files.
@@ -68,7 +68,7 @@ def photo_features(model, preprocess, image_path):
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python src/clip_predict.py train   or   python src/clip_predict.py path/to/photo.jpg")
+        print("Usage: python3 src/clip_predict.py train   or   python3 src/clip_predict.py path/to/photo.jpg")
         sys.exit(1)
 
     if sys.argv[1] == "train":

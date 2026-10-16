@@ -5,7 +5,7 @@ accuracy, and builds a confusion matrix showing exactly which countries it mixes
 which, not just how often it's wrong overall.
 
 Run it with:
-    python src/confusion_matrix.py
+    python3 src/confusion_matrix.py
 """
 
 from pathlib import Path

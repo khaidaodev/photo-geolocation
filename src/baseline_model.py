@@ -7,7 +7,7 @@ logistic regression on top to guess the country. Basically borrowing a model's e
 instead of training a new pair from nothing (transfer learning).
 
 Run it with:
-    python src/baseline_model.py
+    python3 src/baseline_model.py
 """
 
 import ssl

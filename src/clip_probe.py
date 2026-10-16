@@ -11,7 +11,7 @@ strength C (how hard the classifier is stopped from over-fitting) is picked usin
 split, and the test split is only used once, at the end.
 
 Run it with:
-    python src/clip_probe.py
+    python3 src/clip_probe.py
 """
 
 from pathlib import Path

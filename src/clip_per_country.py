@@ -8,7 +8,7 @@ score can wobble by several points, so the pattern across countries is more trus
 the exact order of two close countries.
 
 Run it with:
-    python src/clip_per_country.py
+    python3 src/clip_per_country.py
 """
 
 import numpy as np

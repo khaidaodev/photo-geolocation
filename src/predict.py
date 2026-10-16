@@ -7,7 +7,7 @@ Prints full country names (Japan) next to the two-letter codes (JP), so the outp
 without having to look the codes up.
 
 Run it with:
-    python src/predict.py path/to/your/photo.jpg
+    python3 src/predict.py path/to/your/photo.jpg
 """
 
 import sys
@@ -67,7 +67,7 @@ def format_prediction(country_code: str, confidence: float) -> str:
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
-        print("Usage: python src/predict.py path/to/photo.jpg")
+        print("Usage: python3 src/predict.py path/to/photo.jpg")
         sys.exit(1)
 
     image_path = Path(sys.argv[1])

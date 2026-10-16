@@ -9,7 +9,7 @@ guessed as country B. Each country only has 100 test photos, so a count of 3 or 
 evidence and a count of 20 is not.
 
 Run it with:
-    python src/clip_confusions.py
+    python3 src/clip_confusions.py
 """
 
 import numpy as np

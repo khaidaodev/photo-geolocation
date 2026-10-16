@@ -10,7 +10,7 @@ subset of well known, visually distinctive countries to actually build the first
 before trying to scale up to more of the 211.
 
 Run it with:
-    python src/data_loading.py
+    python3 src/data_loading.py
 """
 
 import ssl
