@@ -313,7 +313,17 @@ at top 5. With 21,100 test photos, luck alone can move a score by about 0.3 poin
 calling this an improvement. The wording doesn't seem to matter much, and the only one that did
 clearly worse on valid was the bare country name. It took 19.0 seconds.
 
-Next real step is trying a bigger CLIP model, ViT-B-16, in place of ViT-B-32, and seeing if the score moves.
+**A bigger CLIP model (ViT-B-16):** every CLIP number up to here used the smallest model, ViT-B-32.
+clip_probe_b16.py is the same probe with ViT-B-16 swapped in and nothing else changed: same 31,650
+training photos, same C values, C picked on the valid photos only, and the test photos read once at
+the end. Its photo numbers go in their own folder, results/clip_features_vit_b16, so the ViT-B-32
+ones are left alone.
+
+On valid it got 32.2%. On the test photos it got 31.4% top 1, 48.5% top 3 and 57.0% top 5, against
+25.9%, 41.9% and 50.1% for ViT-B-32. That is 5.5 points better at top 1, 6.6 at top 3 and 6.9 at top
+5, and the model size is the only thing that changed. It took 1 hour 8 minutes 16 seconds.
+
+Next real step is a bigger one again, ViT-L-14, to see if the gain keeps going.
 
 ## Try it on your own photo
 
