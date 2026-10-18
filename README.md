@@ -323,7 +323,17 @@ On valid it got 32.2%. On the test photos it got 31.4% top 1, 48.5% top 3 and 57
 25.9%, 41.9% and 50.1% for ViT-B-32. That is 5.5 points better at top 1, 6.6 at top 3 and 6.9 at top
 5, and the model size is the only thing that changed. It took 1 hour 8 minutes 16 seconds.
 
-Next real step is a bigger one again, ViT-L-14, to see if the gain keeps going.
+**An even bigger model (ViT-L-14):** clip_probe_l14.py is the same probe again with OpenAI's
+ViT-L-14 swapped in, so the model is the only thing that changed. Its photo numbers go in
+results/clip_features_vit_l14.
+
+On valid it got 41.1%. On the test photos it got 40.4% top 1, 58.6% top 3 and 66.9% top 5. That is
+9.0 points better than ViT-B-16 at top 1 (10.1 at top 3 and 9.9 at top 5) and 14.5 points better
+than ViT-B-32 (16.7 and 16.8). The gain didn't level off going from ViT-B-16 to ViT-L-14. It took 3
+hours 19 minutes 56 seconds.
+
+Next real step is the same bigger models with no training at all, just the country sentences, to see
+how much of the score the training adds.
 
 ## Try it on your own photo
 
