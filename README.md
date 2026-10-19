@@ -332,8 +332,20 @@ On valid it got 41.1%. On the test photos it got 40.4% top 1, 58.6% top 3 and 66
 than ViT-B-32 (16.7 and 16.8). The gain didn't level off going from ViT-B-16 to ViT-L-14. It took 3
 hours 19 minutes 56 seconds.
 
-Next real step is the same bigger models with no training at all, just the country sentences, to see
-how much of the score the training adds.
+**The same bigger models with no training (zero-shot):** clip_zero_shot_b16.py and
+clip_zero_shot_l14.py are the zero-shot script again with ViT-B-16 and ViT-L-14 swapped in. Same
+sentence, "a photo taken in {}", and no training photos used at all.
+
+ViT-B-16 got 20.9% top 1, 36.7% top 3 and 45.6% top 5, and took 8.5 seconds. ViT-L-14 got 29.5%,
+48.3% and 57.2%, and took 14.3 seconds. ViT-B-32 got 16.3%, 30.6% and 39.0%, so ViT-L-14 is 13.2
+points better at top 1 without seeing a single training photo.
+
+Next to the trained scores, training added 9.6 points at top 1 for ViT-B-32 (16.3% to 25.9%), 10.5
+for ViT-B-16 (20.9% to 31.4%) and 10.9 for ViT-L-14 (29.5% to 40.4%). So it adds roughly 10 points
+whichever model it sits on. Of the 14.5 points ViT-L-14 gains over ViT-B-32 once trained, 13.2 were
+already there with no training.
+
+Next real step is looking at where ViT-L-14 does well and badly, country by country.
 
 ## Try it on your own photo
 
