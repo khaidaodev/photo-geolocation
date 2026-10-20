@@ -345,7 +345,18 @@ for ViT-B-16 (20.9% to 31.4%) and 10.9 for ViT-L-14 (29.5% to 40.4%). So it adds
 whichever model it sits on. Of the 14.5 points ViT-L-14 gains over ViT-B-32 once trained, 13.2 were
 already there with no training.
 
-Next real step is looking at where ViT-L-14 does well and badly, country by country.
+**Country by country with ViT-L-14:** clip_per_country_l14.py is the same per-country breakdown as
+before, done with ViT-L-14's photo numbers. Each country has 100 test photos, so each score is a
+fraction out of 100.
+
+The middle country went from 22% with ViT-B-32 to 38%. The number of countries scoring 50% or more
+went from 16 to 54, and the number under 10% went from 18 to 0. ViT-L-14 did better on 207 of the
+211 countries, the same on 2 and worse on 2. It took 13.0 seconds.
+
+So the gain is spread across almost every country, not carried by a few. A single country can move
+by several points on a different 100 photos, but 207 out of 211 is hard to put down to luck.
+
+Next real step is where ViT-L-14's wrong guesses go, the same check I did for ViT-B-32.
 
 ## Try it on your own photo
 
