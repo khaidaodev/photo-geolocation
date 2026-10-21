@@ -356,7 +356,11 @@ went from 16 to 54, and the number under 10% went from 18 to 0. ViT-L-14 did bet
 So the gain is spread across almost every country, not carried by a few. A single country can move
 by several points on a different 100 photos, but 207 out of 211 is hard to put down to luck.
 
-Next real step is where ViT-L-14's wrong guesses go, the same check I did for ViT-B-32.
+**Where ViT-L-14's wrong guesses go:** clip_confusions_l14.py takes the 15 most common mix-ups from
+the ViT-B-32 check and counts how often ViT-L-14 makes each one. ViT-L-14 made fewer of them in 11
+of the 15. In the other 4 it made the same number or more. It took 18.2 seconds.
+
+Next real step is a predict script for ViT-L-14, the same as clip_predict.py.
 
 ## Try it on your own photo
 
