@@ -360,7 +360,17 @@ by several points on a different 100 photos, but 207 out of 211 is hard to put d
 the ViT-B-32 check and counts how often ViT-L-14 makes each one. ViT-L-14 made fewer of them in 11
 of the 15. In the other 4 it made the same number or more. It took 18.2 seconds.
 
-Next real step is a predict script for ViT-L-14, the same as clip_predict.py.
+**Guessing a photo with ViT-L-14:** clip_predict_l14.py is clip_predict.py with ViT-L-14. I run it
+once with `train`, which trains the classifier from the saved photo numbers and saves it to
+models/clip_classifier_l14.joblib. That file is git-ignored, like the other model files. After that
+I give it a photo and it prints the top 3 guesses.
+
+On the same japan.png photo as before it gave Japan 92.5%, South Korea 4.0% and Hong Kong 0.6%,
+against Japan 98.1%, South Korea 1.4% and Taiwan 0.2% from ViT-B-32. That is one photo, so it's a
+demo and not a score. The 40.4% is the real number.
+
+Next real step is mixing the trained classifier's guesses with the country-sentence guesses, to see
+if the two together beat either one.
 
 ## Try it on your own photo
 
