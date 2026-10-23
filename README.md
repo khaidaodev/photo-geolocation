@@ -369,8 +369,17 @@ On the same japan.png photo as before it gave Japan 92.5%, South Korea 4.0% and 
 against Japan 98.1%, South Korea 1.4% and Taiwan 0.2% from ViT-B-32. That is one photo, so it's a
 demo and not a score. The 40.4% is the real number.
 
-Next real step is mixing the trained classifier's guesses with the country-sentence guesses, to see
-if the two together beat either one.
+**Mixing the classifier with the country sentences (ViT-L-14):** clip_blend_l14.py mixes the trained
+classifier's guesses with the country-sentence guesses, with a weight for how much the sentences
+count. I picked the weight, 0.2, on the valid photos only and read the test photos once.
+
+The blend got 41.2% top 1, 59.9% top 3 and 68.0% top 5, against 40.4%, 58.6% and 66.9% for the
+classifier alone. That is 0.8, 1.3 and 1.1 points better. Luck alone can move a score by about 0.3
+points on these test photos, so it's probably a small real gain, not a big one. It took 19.1
+seconds.
+
+Next real step is checking that C=10 really is the best setting for ViT-L-14, by trying more values
+either side of it.
 
 ## Try it on your own photo
 
