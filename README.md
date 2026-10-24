@@ -378,8 +378,15 @@ classifier alone. That is 0.8, 1.3 and 1.1 points better. Luck alone can move a 
 points on these test photos, so it's probably a small real gain, not a big one. It took 19.1
 seconds.
 
-Next real step is checking that C=10 really is the best setting for ViT-L-14, by trying more values
-either side of it.
+**Is C=10 the right setting for ViT-L-14?** clip_probe_l14_c_grid.py tries C = 3, 5, 10, 20 and 30
+on ViT-L-14's photo numbers. The original probe only tried 1, 10 and 100. On valid, C=3 got 40.5%,
+C=5 got 40.9%, C=10 got 41.1%, C=20 got 40.1% and C=30 got 39.7%. So 10 is still the best, and the
+score falls away on both sides, but only a little close to 10 (C=5 is 0.2 points lower), so the
+setting isn't touchy. On the test photos C=10 gave 40.4% again, the same as before. It took 29.8
+seconds.
+
+Next real step is checking whether ViT-L-14's confidence numbers can be trusted, meaning that when
+it says 80%, it's right about 80% of the time.
 
 ## Try it on your own photo
 
