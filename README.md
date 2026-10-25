@@ -385,8 +385,14 @@ score falls away on both sides, but only a little close to 10 (C=5 is 0.2 points
 setting isn't touchy. On the test photos C=10 gave 40.4% again, the same as before. It took 29.8
 seconds.
 
-Next real step is checking whether ViT-L-14's confidence numbers can be trusted, meaning that when
-it says 80%, it's right about 80% of the time.
+**Can ViT-L-14's confidence be trusted?** When the classifier says 80%, is it right about 80% of the
+time? clip_confidence_l14.py sorts the test photos into 10 bands by how confident ViT-L-14 was in
+its top guess, then compares what it said with how often it was right in each band.
+
+It was under-confident, meaning it was right more often than it claimed, not less.
+
+Next real step is trying to fix that, by rescaling the probabilities with one number picked on the
+valid photos.
 
 ## Try it on your own photo
 
