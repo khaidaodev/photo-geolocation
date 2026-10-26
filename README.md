@@ -391,8 +391,17 @@ its top guess, then compares what it said with how often it was right in each ba
 
 It was under-confident, meaning it was right more often than it claimed, not less.
 
-Next real step is trying to fix that, by rescaling the probabilities with one number picked on the
-valid photos.
+**Fixing ViT-L-14's confidence (temperature scaling):** clip_calibrate_l14.py rescales the
+classifier's probabilities with one number, called the temperature, to see if the confidence can be
+made to match how often it's right. I picked the temperature, 0.9, on the valid photos only and read
+the test photos once.
+
+The average gap between what it said and how often it was right went from 5.3% to 2.3%. Top-1
+accuracy didn't change, which is expected because rescaling doesn't change which country is on top.
+It took 9.6 seconds.
+
+Next real step is checking how much the number of training photos matters, by training on a smaller
+share of them.
 
 ## Try it on your own photo
 
