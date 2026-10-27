@@ -400,8 +400,18 @@ The average gap between what it said and how often it was right went from 5.3% t
 accuracy didn't change, which is expected because rescaling doesn't change which country is on top.
 It took 9.6 seconds.
 
-Next real step is checking how much the number of training photos matters, by training on a smaller
-share of them.
+**Does the number of training photos matter (ViT-L-14)?** clip_training_size_l14.py trains the
+classifier on a share of the training photos, the same share from every country, and scores it on
+the test photos. With 10% of the training photos it got 26.8% top 1, with 25% it got 33.1%, with 50%
+it got 36.9% and with all of them it got 40.4%. Each share is one random pick with a fixed seed, so
+the small ones can wobble a little. It took 15.4 seconds.
+
+The curve hasn't flattened: going from half the photos to all of them still added 3.5 points. With
+only 10% of the photos, ViT-L-14 already scored slightly higher than ViT-B-32 trained on all of them
+(26.8% against 25.9%).
+
+Next real step is trying two simpler classifiers on the same photo numbers, to see if logistic
+regression is the right choice.
 
 ## Try it on your own photo
 
