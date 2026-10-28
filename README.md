@@ -410,8 +410,16 @@ The curve hasn't flattened: going from half the photos to all of them still adde
 only 10% of the photos, ViT-L-14 already scored slightly higher than ViT-B-32 trained on all of them
 (26.8% against 25.9%).
 
-Next real step is trying two simpler classifiers on the same photo numbers, to see if logistic
-regression is the right choice.
+**Is logistic regression the right classifier (ViT-L-14)?** clip_classifiers_l14.py tries two
+simpler ways of guessing the country from ViT-L-14's photo numbers. Nearest centroid averages each
+country's training photos into one point and picks the country whose point is closest. Nearest
+neighbours lets the k closest training photos vote. I picked k on the valid photos only and it ended
+up as k=1, so the single closest photo decides. On the test photos, logistic regression got 40.4%
+top 1, nearest neighbours 30.2% and nearest centroid 28.8%. It took 32.0 seconds.
+
+So logistic regression is clearly the better choice, by 10 points or more.
+
+Next real step is trying ViT-L-14 weights from another source, DFN-2B, in the same probe.
 
 ## Try it on your own photo
 
