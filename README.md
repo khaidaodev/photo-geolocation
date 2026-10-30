@@ -419,7 +419,18 @@ top 1, nearest neighbours 30.2% and nearest centroid 28.8%. It took 32.0 seconds
 
 So logistic regression is clearly the better choice, by 10 points or more.
 
-Next real step is trying ViT-L-14 weights from another source, DFN-2B, in the same probe.
+**A different ViT-L-14 (DFN-2B weights):** clip_probe_l14_dfn2b.py is the same probe with the DFN-2B
+version of ViT-L-14 in place of OpenAI's. It's the same size of model trained on different data, so
+only the weights changed. Its photo numbers go in results/clip_features_vit_l14_dfn2b.
+
+On valid it got 37.0%. On the test photos it got 36.7% top 1, 53.7% top 3 and 61.5% top 5. OpenAI's
+ViT-L-14 got 40.4%, 58.6% and 66.9%, so DFN-2B was 3.7, 4.9 and 5.4 points worse. It took 3 hours 44
+minutes 40 seconds.
+
+DFN-2B was trained on web data, so some of the Country211 test photos could be in its training data.
+I haven't checked, the same as for OpenAI's CLIP.
+
+Next real step is a third set of ViT-L-14 weights, LAION-2B, in the same probe.
 
 ## Try it on your own photo
 
