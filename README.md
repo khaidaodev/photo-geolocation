@@ -430,7 +430,20 @@ minutes 40 seconds.
 DFN-2B was trained on web data, so some of the Country211 test photos could be in its training data.
 I haven't checked, the same as for OpenAI's CLIP.
 
-Next real step is a third set of ViT-L-14 weights, LAION-2B, in the same probe.
+**A third ViT-L-14 (LAION-2B weights):** clip_probe_l14_laion2b.py is the same probe with the
+LAION-2B version of ViT-L-14. Again only the weights changed. Its photo numbers go in
+results/clip_features_vit_l14_laion2b.
+
+On valid it got 35.5%. On the test photos it got 35.2% top 1, 52.1% top 3 and 60.0% top 5. That is
+5.2, 6.5 and 6.9 points worse than OpenAI's ViT-L-14, and 1.5, 1.6 and 1.5 points worse than DFN-2B.
+It took 4 hours 32 minutes 13 seconds.
+
+So of the three sets of ViT-L-14 weights, OpenAI's is the best on this task by a clear margin, and
+they are not interchangeable. LAION-2B was also trained on web data, so I haven't ruled out overlap
+with the Country211 test photos there either.
+
+Next real step is joining two sets of ViT-L-14 photo numbers side by side, to see if two different
+sets of weights together beat either one alone.
 
 ## Try it on your own photo
 
