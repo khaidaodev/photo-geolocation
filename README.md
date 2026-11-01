@@ -442,8 +442,17 @@ So of the three sets of ViT-L-14 weights, OpenAI's is the best on this task by a
 they are not interchangeable. LAION-2B was also trained on web data, so I haven't ruled out overlap
 with the Country211 test photos there either.
 
-Next real step is joining two sets of ViT-L-14 photo numbers side by side, to see if two different
-sets of weights together beat either one alone.
+**Joining two sets of ViT-L-14 photo numbers:** clip_joined_l14.py sticks the OpenAI and DFN-2B
+photo numbers for each photo side by side and trains one classifier on the joined list. The idea is
+that two different sets of weights might notice different things.
+
+On the test photos it got 42.3% top 1, 60.0% top 3 and 67.8% top 5. OpenAI's alone got 40.4%, 58.6%
+and 66.9%, so joining added 1.9, 1.4 and 0.9 points. Against DFN-2B alone (36.7%, 53.7% and 61.5%)
+it is 5.6, 6.3 and 6.3 points better. It took 41.2 seconds.
+
+That is more than the 0.8 points the country-sentence blend added at top 1.
+
+Next real step is joining a third set of photo numbers, ViT-B-16, to see if more sets keep helping.
 
 ## Try it on your own photo
 
