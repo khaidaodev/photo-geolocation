@@ -452,7 +452,15 @@ it is 5.6, 6.3 and 6.3 points better. It took 41.2 seconds.
 
 That is more than the 0.8 points the country-sentence blend added at top 1.
 
-Next real step is joining a third set of photo numbers, ViT-B-16, to see if more sets keep helping.
+**Joining a third set (ViT-B-16 as well):** clip_joined_three.py joins the ViT-B-16 photo numbers
+onto the OpenAI and DFN-2B ViT-L-14 ones and trains one classifier on all three.
+
+On the test photos it got 42.0% top 1, 59.6% top 3 and 67.7% top 5. That is 0.3, 0.4 and 0.1 points
+lower than the two-set join (42.3%, 60.0% and 67.8%), and 1.6, 1.0 and 0.8 points better than
+OpenAI's ViT-L-14 alone. Luck alone can move a score by about 0.3 points, so the third set neither
+helped nor clearly hurt. It took 45.6 seconds.
+
+Next real step is trying the LAION-2B photo numbers in the join too.
 
 ## Try it on your own photo
 
