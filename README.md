@@ -460,7 +460,18 @@ lower than the two-set join (42.3%, 60.0% and 67.8%), and 1.6, 1.0 and 0.8 point
 OpenAI's ViT-L-14 alone. Luck alone can move a score by about 0.3 points, so the third set neither
 helped nor clearly hurt. It took 45.6 seconds.
 
-Next real step is trying the LAION-2B photo numbers in the join too.
+**Joining the LAION-2B numbers too:** clip_joined_l14_all.py tries two more joins of the ViT-L-14
+photo numbers. One is OpenAI with LAION-2B, the other is all three ViT-L-14 sets together.
+
+OpenAI with LAION-2B got 41.2% top 1, 59.1% top 3 and 66.7% top 5. That is 0.8 and 0.5 points better
+than OpenAI alone at top 1 and top 3, 0.2 worse at top 5, and 1.1, 0.9 and 1.1 points below the
+OpenAI and DFN-2B join (42.3%, 60.0% and 67.8%). All three sets got 42.1% top 1, 60.1% top 3 and
+67.5% top 5, which is 0.2 below, 0.1 above and 0.3 below that same join. Luck alone can move a score
+by about 0.3 points, so the LAION-2B numbers did not add anything to the OpenAI and DFN-2B join.
+Both script checks matched the earlier runs (42.3% and 35.2%), and the whole script took 1 minute 25
+seconds.
+
+Next real step is blending the OpenAI and DFN-2B join with the zero-shot sentence scores.
 
 ## Try it on your own photo
 
