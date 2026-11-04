@@ -471,7 +471,17 @@ by about 0.3 points, so the LAION-2B numbers did not add anything to the OpenAI 
 Both script checks matched the earlier runs (42.3% and 35.2%), and the whole script took 1 minute 25
 seconds.
 
-Next real step is blending the OpenAI and DFN-2B join with the zero-shot sentence scores.
+**Blending the sentences into the join:** clip_blend_joined_l14.py does the same blend as before,
+but on top of the classifier trained on the OpenAI and DFN-2B photo numbers joined together. The
+sentences are still "a photo taken in {}", scored with the OpenAI ViT-L-14 numbers. The weight on
+the sentence scores was picked on the valid photos only.
+
+On the valid photos the weights scored 43.3% at 0.0, 43.9% at 0.1, 44.5% at 0.2 and 44.4% at 0.3, so
+0.2 was used. On the test photos that gave 43.5% top 1, 61.9% top 3 and 69.4% top 5. That is 1.2,
+1.9 and 1.6 points better than the join alone (42.3%, 60.0% and 67.8%), and 3.1, 3.3 and 2.5 points
+better than OpenAI's ViT-L-14 alone. It is the best result so far. It took 23.4 seconds.
+
+Next real step is saving this best setup as a classifier I can run on a single photo.
 
 ## Try it on your own photo
 
