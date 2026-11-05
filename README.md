@@ -481,7 +481,20 @@ On the valid photos the weights scored 43.3% at 0.0, 43.9% at 0.1, 44.5% at 0.2 
 1.9 and 1.6 points better than the join alone (42.3%, 60.0% and 67.8%), and 3.1, 3.3 and 2.5 points
 better than OpenAI's ViT-L-14 alone. It is the best result so far. It took 23.4 seconds.
 
-Next real step is saving this best setup as a classifier I can run on a single photo.
+**Guessing a photo with the best setup:** clip_predict_best.py runs one photo through both ViT-L-14
+models (OpenAI and DFN-2B), joins the two sets of numbers, scores them with the joined classifier
+and blends in the sentence scores at weight 0.2. Run it with `train` once to save the classifier,
+then give it a photo. It saves under its own name in models/, so the earlier classifiers are left
+alone.
+
+On the same japan.png photo as before it gave Japan 95.7%, South Korea 2.1% and China 0.5%, against
+Japan 92.5% for ViT-L-14 alone and 98.1% for ViT-B-32. That is one photo, so it says nothing about
+which setup is better. The test photos do that, and there it scored 43.5% against 40.4% and 25.9%.
+The run took 24.4 seconds. The percentages are the blended scores turned back into probabilities,
+and I only checked how honest percentages are for the single OpenAI classifier, so I wouldn't treat
+these as exact odds.
+
+Next real step is a per-country breakdown for this best setup, to compare with ViT-L-14 alone.
 
 ## Try it on your own photo
 
