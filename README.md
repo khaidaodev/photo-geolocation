@@ -494,7 +494,23 @@ The run took 24.4 seconds. The percentages are the blended scores turned back in
 and I only checked how honest percentages are for the single OpenAI classifier, so I wouldn't treat
 these as exact odds.
 
-Next real step is a per-country breakdown for this best setup, to compare with ViT-L-14 alone.
+**Country by country with the best setup:** clip_per_country_best.py trains ViT-L-14 on its own and
+the best setup side by side, and scores each country for both. Each country has 100 test photos, so
+each score is a fraction out of 100. Both overall scores matched the earlier runs (40.4% and 43.5%).
+
+The middle country went from 38% with ViT-L-14 alone to 41%. The number of countries scoring 50% or
+more went from 54 to 71. The best setup did better on 151 of the 211 countries, the same on 14 and
+worse on 46. The best countries were the Faroe Islands at 81% and Panama at 79%. The lowest were
+Austria and Colombia at 16%, then Jamaica and Mozambique at 17%, and Ukraine, Venezuela and Kosovo
+at 18%. It took 25.5 seconds.
+
+Of the 10 countries ViT-L-14 alone scored lowest on, 9 went up and Austria stayed at 16%, but 7 of
+those 10 are still in the best setup's bottom 10. So it helped them without fixing them. I picked
+those 10 from one model's results, so some would creep up on a re-run by chance, and the 46
+countries that got worse show the gain is not even. With 100 photos a country, small differences
+wobble.
+
+Next real step is checking where this best setup's wrong guesses go, against ViT-L-14 alone.
 
 ## Try it on your own photo
 
