@@ -510,7 +510,26 @@ those 10 from one model's results, so some would creep up on a re-run by chance,
 countries that got worse show the gain is not even. With 100 photos a country, small differences
 wobble.
 
-Next real step is checking where this best setup's wrong guesses go, against ViT-L-14 alone.
+**Where the best setup's wrong guesses go:** clip_confusions_best.py takes the 15 most common
+mistakes of ViT-L-14 on its own and counts how often the best setup makes each one. Both overall
+scores matched the earlier runs (40.4% and 43.5%).
+
+The best setup made fewer of these mistakes in 10 of the 15 pairs, more in 4 and the same in 1.
+Israel as Palestine went from 14 to 8, Bhutan as Nepal from 13 to 8, Cyprus as Greece from 13 to 9
+and South Georgia as the Falklands from 17 to 11. Kosovo as Bosnia and Herzegovina went up from 16
+to 20 and Latvia as Estonia from 13 to 17. It took 24.4 seconds.
+
+The best setup's own most common mistakes include Kosovo as Bosnia and Herzegovina (20), Latvia as
+Estonia (17), Finland as Sweden (16), Peru as Bolivia (16) and Tanzania as Kenya (16), all nearby
+countries. For the low scoring countries, Austria, Bulgaria, Romania, Chile and Colombia mostly went
+to neighbours or near neighbours, but not all of it is tidy. Some of the odd ones are Poland photos
+going to Latvia (9) and Colombia photos going to Paraguay (7).
+
+I picked those 15 pairs because they were ViT-L-14's worst, so some would drop by chance alone, and
+counts of 4 to 11 out of 100 are weak evidence. I haven't looked at the photos, so I'm leaving the
+reasons out.
+
+Next real step is checking how honest the best setup's percentages are.
 
 ## Try it on your own photo
 
