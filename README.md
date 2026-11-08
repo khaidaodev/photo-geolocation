@@ -529,7 +529,25 @@ I picked those 15 pairs because they were ViT-L-14's worst, so some would drop b
 counts of 4 to 11 out of 100 are weak evidence. I haven't looked at the photos, so I'm leaving the
 reasons out.
 
-Next real step is checking how honest the best setup's percentages are.
+**How honest the best setup's percentages are:** clip_calibrate_best.py does the same check as
+clip_calibrate_l14.py, but on the blended scores. It tries one number that makes every percentage a
+bit sharper or flatter, and picks it on the valid photos only by lowest log loss. The test photos
+were read once at the end.
+
+The best number was 0.95, which is barely a change. The valid log loss was 2.3338 at 0.90, 2.3310 at
+0.95 and 2.3346 at 1.00, so it is flat there and I'd say about 0.95, not exactly 0.95. The average
+gap between what it said and how often it was right went from 3.0% to 2.0%. ViT-L-14 on its own
+started at 5.3%, so blending in the sentences already made the percentages more honest before any
+rescaling. Top 1 stayed at 43.5%, as it has to, since the order of the countries for each photo does
+not change. It took 27.0 seconds.
+
+After rescaling, the low bins are a little too sure of themselves (10% to 20% said 15.0% and was
+right 13.5%). The 70% to 90% bins are still modest by about 4 points (80% to 90% said 85.0% and was
+right 88.8%). The top bin, 90% to 100%, said 95.8% and was right 97.2%, so very confident guesses
+can be trusted. So the percentages are mostly honest and slightly modest in the middle, and I
+wouldn't call them exact odds.
+
+Next real step is a final tidy of this README.
 
 ## Try it on your own photo
 
