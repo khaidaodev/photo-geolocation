@@ -11,17 +11,41 @@ really hard visual problem, way more subtle than "spot the object in the frame."
 
 ## Where it's at right now
 
-Data pipeline's built, the 20-country problem is fully solved and understood (17.1% ceiling),
-and the 50-country version is settled too (13.0% valid, 12.1% on the untouched test split). The
-question of how much of the network to unfreeze gave the same answer at both sizes. See
-"Results so far" for the full breakdown.
+The best I have is 43.5% top 1, 61.9% top 3 and 69.4% top 5 on the 21,100 untouched test photos,
+across all 211 countries. Random guessing gets 0.5% for top 1 and 1.4% for top 3. It comes from
+CLIP, a model OpenAI trained on photos paired with captions, kept frozen with no fine-tuning, and a
+plain logistic regression on top. The setup joins the photo numbers from two versions of ViT-L-14
+(OpenAI's and DFN-2B's) and mixes in the zero-shot country sentence scores at weight 0.2, which I
+picked on the valid photos only.
 
-Dataset is Country211, built by OpenAI to test CLIP: 63,000 geotagged Flickr photos, balanced
-across 211 countries (150 train / 50 valid / 100 test each), about 11GB total.
+The ResNets I fine-tuned first stopped at about 11.4% on 100 countries, however I changed the setup.
+Swapping in frozen CLIP took the same 100 countries to 26.1% in 6 minutes 25 seconds, and all 211
+countries to 25.9%. After that it was bigger CLIP models and joining them. Not every later
+experiment helped (the LAION-2B weights scored lower and a third joined set added nothing), and I've
+written those up in "Results so far" the same as the ones that worked.
 
-211-way classification is brutal, even CLIP struggles with it. First pass stuck to 20 well
-known, visually distinct countries (see `STARTER_COUNTRIES` in `src/data_loading.py`), now
-scaling up towards the full 211.
+| Setup | Countries | Top 1 | Top 3 | Top 5 |
+|---|---|---|---|---|
+| ResNet50, fine-tuned | 100 | 11.4% | 20.8% | 27.6% |
+| ResNet101, fine-tuned | 100 | 11.3% | 20.9% | 27.7% |
+| CLIP ViT-B-32, trained probe | 211 | 25.9% | 41.9% | 50.1% |
+| CLIP ViT-B-16, trained probe | 211 | 31.4% | 48.5% | 57.0% |
+| CLIP ViT-L-14 (OpenAI), no training | 211 | 29.5% | 48.3% | 57.2% |
+| CLIP ViT-L-14 (OpenAI), trained probe | 211 | 40.4% | 58.6% | 66.9% |
+| OpenAI and DFN-2B ViT-L-14 joined | 211 | 42.3% | 60.0% | 67.8% |
+| Joined, plus sentence scores (best) | 211 | 43.5% | 61.9% | 69.4% |
+
+The ResNets were only tested on 100 countries, so they aren't a like for like comparison with the
+211-country CLIP rows. Everything is one run each, and with 21,100 test photos luck alone can move a
+score by about 0.3 points. The 1 to 2 point gains from joining and blending are above that but small
+next to the gain from the bigger models. Country211 was built by OpenAI to test CLIP, and the CLIP
+weights I used were trained on web data, so I haven't ruled out some of the test photos being in
+their training data.
+
+Dataset is Country211, built by OpenAI to test CLIP: 63,300 geotagged Flickr photos, balanced across
+211 countries (150 train / 50 valid / 100 test each), about 11GB total. The ResNet work started on
+20 well known, visually distinct countries (see `STARTER_COUNTRIES` in `src/data_loading.py`) and
+scaled up to 100. The CLIP work uses all 211.
 
 ## Results so far
 
@@ -547,9 +571,27 @@ right 88.8%). The top bin, 90% to 100%, said 95.8% and was right 97.2%, so very 
 can be trusted. So the percentages are mostly honest and slightly modest in the middle, and I
 wouldn't call them exact odds.
 
-Next real step is a final tidy of this README.
-
 ## Try it on your own photo
+
+For the best results use the CLIP version. It runs each photo through both ViT-L-14 models, scores
+it with the joined classifier and mixes in the sentence scores. Run `train` once to save the
+classifier, then give it a photo and it prints the top 3 guesses:
+
+```bash
+python3 src/clip_predict_best.py train
+python3 src/clip_predict_best.py path/to/your/photo.jpg
+```
+
+The `train` step needs the photo numbers that `clip_probe_l14.py` and `clip_probe_l14_dfn2b.py`
+save, so run those first. The saved classifier goes in `models/`, which git ignores. On my japan.png
+demo photo it gave Japan 95.7%, South Korea 2.1% and China 0.5%. That is one photo, so it's a demo
+and not a score. The percentages are only mostly honest, a bit modest in the middle, so I wouldn't
+treat them as exact odds.
+
+`clip_predict.py` (ViT-B-32) and `clip_predict_l14.py` (ViT-L-14 alone) are the smaller versions,
+and they're run the same way.
+
+**The ResNet version:**
 
 `src/predict.py` loads the best saved model and predicts the top 3 most likely countries for
 any photo you give it, with a confidence percentage for each (not just a raw guess).
@@ -596,20 +638,51 @@ the best version to `models/best_model.pt` as it trains. Stops itself automatica
 validation accuracy plateaus. With ResNet50 and more countries, expect real training runs to
 take many hours, sometimes overnight, on a CPU.
 
+`build_model` in `src/finetune_model.py` currently builds a ResNet101. For the ResNet50 setup from
+earlier, swap `resnet101` and `ResNet101_Weights` in that function for `resnet50` and
+`ResNet50_Weights`.
+
 Last script runs the saved model against the untouched test split for a final accuracy
 number, plus prints the most commonly confused country pairs.
 
+**The CLIP scripts:** these read photo numbers that an earlier script saved, so they go in order.
+Each probe script extracts the photo numbers the first time and saves them to `results/` (git
+ignored), and reuses them after that. The first run of each CLIP model downloads its weights through
+open_clip, so that run needs internet.
+
+```bash
+python3 src/clip_probe.py
+python3 src/clip_probe_l14.py
+python3 src/clip_probe_l14_dfn2b.py
+python3 src/clip_joined_l14.py
+python3 src/clip_blend_joined_l14.py
+python3 src/clip_predict_best.py train
+```
+
+That's the path to the best result. `clip_probe_b16.py`, `clip_probe_l14_laion2b.py`, the
+`clip_zero_shot*.py` scripts and the other `clip_` scripts are the side experiments from "Results so
+far", and each one says at the top what it needs and how to run it. The ViT-L-14 probes were the
+slow ones, between 3 hours 19 minutes and 4 hours 32 minutes each on my Mac, and ViT-B-16 took 1
+hour 8 minutes. After the probes, `clip_joined_l14.py` took 41.2 seconds and
+`clip_blend_joined_l14.py` took 23.4 seconds.
+
 ## Testing and git
 
-`tests/` covers the bits that don't need the full dataset, country code lookups, folder
-scanning, both models' feature extraction, layer-freezing, augmentation, learning rate,
-best-epoch, early stopping, and checkpoint saving logic, the prediction script's ranking and
-model-loading logic, and the confusion matrix's counting and mix-up-finding logic, all using
-fake data and fake models rather than needing a real trained model to test against.
+`tests/` covers the bits that don't need the full dataset, country code lookups, folder scanning,
+both models' feature extraction, layer-freezing, augmentation, learning rate, best-epoch, early
+stopping, and checkpoint saving logic, the prediction script's ranking and model-loading logic, and
+the confusion matrix's counting and mix-up-finding logic. The CLIP scripts have tests for their
+small functions too, like the top-k scoring, the sentence blend, the temperature scaling, the scores
+for each country, the nearest centroid, the training-size sampling and the joining and column
+picking. All of them use made-up numbers and fake models, so none of them needs the dataset or a
+downloaded model.
+
+`data/`, `models/` and `results/` are git-ignored, so the dataset, the saved classifiers and the
+saved photo numbers never go in the repo.
 
 ## Tools used
 
-Python, PyTorch/torchvision, scikit-learn, pycountry.
+Python, PyTorch/torchvision, scikit-learn, open_clip, pycountry, pytest.
 
 ## Where the data's from
 
