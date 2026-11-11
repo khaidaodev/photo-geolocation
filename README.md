@@ -36,11 +36,12 @@ written those up in "Results so far" the same as the ones that worked.
 | Joined, plus sentence scores (best) | 211 | 43.5% | 61.9% | 69.4% |
 
 The ResNets were only tested on 100 countries, so they aren't a like for like comparison with the
-211-country CLIP rows. Everything is one run each, and with 21,100 test photos luck alone can move a
-score by about 0.3 points. The 1 to 2 point gains from joining and blending are above that but small
-next to the gain from the bigger models. Country211 was built by OpenAI to test CLIP, and the CLIP
-weights I used were trained on web data, so I haven't ruled out some of the test photos being in
-their training data.
+211-country CLIP rows. Everything is one run each. When I resampled the test photos, the best setup
+beat OpenAI's ViT-L-14 alone by 2.6 to 3.5 points every time (see "Checking how much luck moves the
+score" in "Results so far"). I haven't run that check on the smaller steps, joining on its own (1.9
+points) or adding the sentences (1.2 points). Country211 was built by OpenAI to test CLIP, and the
+CLIP weights I used were trained on web data, so I haven't ruled out some of the test photos being
+in their training data.
 
 Dataset is Country211, built by OpenAI to test CLIP: 63,300 geotagged Flickr photos, balanced across
 211 countries (150 train / 50 valid / 100 test each), about 11GB total. The ResNet work started on
@@ -331,11 +332,11 @@ at the test photos, once. On valid: "a photo taken in {}" 17.1%, "a photo of {}"
 from {}" 17.1%, "a photo of a place in {}" 16.5%, the bare country name 14.9%, and all five
 averaged 17.1%. Three tied at the top and the script picked the averaged one.
 
-On the test photos the averaged wordings got 16.5% top 1, 30.8% top 3 and 39.3% top 5. The
-original wording got 16.3%, 30.6% and 39.0%. That is 0.2 points better at top 1 and top 3 and 0.3
-at top 5. With 21,100 test photos, luck alone can move a score by about 0.3 points, so I'm not
-calling this an improvement. The wording doesn't seem to matter much, and the only one that did
-clearly worse on valid was the bare country name. It took 19.0 seconds.
+On the test photos the averaged wordings got 16.5% top 1, 30.8% top 3 and 39.3% top 5. The original
+wording got 16.3%, 30.6% and 39.0%. That is 0.2 points better at top 1 and top 3 and 0.3 at top 5. I
+hadn't measured how much luck moves a score when I ran this, so I'm not calling this an improvement.
+The wording doesn't seem to matter much, and the only one that did clearly worse on valid was the
+bare country name. It took 19.0 seconds.
 
 **A bigger CLIP model (ViT-B-16):** every CLIP number up to here used the smallest model, ViT-B-32.
 clip_probe_b16.py is the same probe with ViT-B-16 swapped in and nothing else changed: same 31,650
@@ -398,9 +399,8 @@ classifier's guesses with the country-sentence guesses, with a weight for how mu
 count. I picked the weight, 0.2, on the valid photos only and read the test photos once.
 
 The blend got 41.2% top 1, 59.9% top 3 and 68.0% top 5, against 40.4%, 58.6% and 66.9% for the
-classifier alone. That is 0.8, 1.3 and 1.1 points better. Luck alone can move a score by about 0.3
-points on these test photos, so it's probably a small real gain, not a big one. It took 19.1
-seconds.
+classifier alone. That is 0.8, 1.3 and 1.1 points better. I hadn't measured how much luck moves a
+score when I ran this, so I'm treating it as a small gain, not a big one. It took 19.1 seconds.
 
 **Is C=10 the right setting for ViT-L-14?** clip_probe_l14_c_grid.py tries C = 3, 5, 10, 20 and 30
 on ViT-L-14's photo numbers. The original probe only tried 1, 10 and 100. On valid, C=3 got 40.5%,
@@ -481,8 +481,8 @@ onto the OpenAI and DFN-2B ViT-L-14 ones and trains one classifier on all three.
 
 On the test photos it got 42.0% top 1, 59.6% top 3 and 67.7% top 5. That is 0.3, 0.4 and 0.1 points
 lower than the two-set join (42.3%, 60.0% and 67.8%), and 1.6, 1.0 and 0.8 points better than
-OpenAI's ViT-L-14 alone. Luck alone can move a score by about 0.3 points, so the third set neither
-helped nor clearly hurt. It took 45.6 seconds.
+OpenAI's ViT-L-14 alone. I hadn't measured how much luck moves a score when I ran this, so I'm
+treating the third set as neither helping nor clearly hurting. It took 45.6 seconds.
 
 **Joining the LAION-2B numbers too:** clip_joined_l14_all.py tries two more joins of the ViT-L-14
 photo numbers. One is OpenAI with LAION-2B, the other is all three ViT-L-14 sets together.
@@ -490,10 +490,10 @@ photo numbers. One is OpenAI with LAION-2B, the other is all three ViT-L-14 sets
 OpenAI with LAION-2B got 41.2% top 1, 59.1% top 3 and 66.7% top 5. That is 0.8 and 0.5 points better
 than OpenAI alone at top 1 and top 3, 0.2 worse at top 5, and 1.1, 0.9 and 1.1 points below the
 OpenAI and DFN-2B join (42.3%, 60.0% and 67.8%). All three sets got 42.1% top 1, 60.1% top 3 and
-67.5% top 5, which is 0.2 below, 0.1 above and 0.3 below that same join. Luck alone can move a score
-by about 0.3 points, so the LAION-2B numbers did not add anything to the OpenAI and DFN-2B join.
-Both script checks matched the earlier runs (42.3% and 35.2%), and the whole script took 1 minute 25
-seconds.
+67.5% top 5, which is 0.2 below, 0.1 above and 0.3 below that same join. I hadn't measured how much
+luck moves a score when I ran this, so I'm treating the LAION-2B numbers as not adding anything to
+the OpenAI and DFN-2B join. Both script checks matched the earlier runs (42.3% and 35.2%), and the
+whole script took 1 minute 25 seconds.
 
 **Blending the sentences into the join:** clip_blend_joined_l14.py does the same blend as before,
 but on top of the classifier trained on the OpenAI and DFN-2B photo numbers joined together. The
@@ -570,6 +570,24 @@ right 13.5%). The 70% to 90% bins are still modest by about 4 points (80% to 90%
 right 88.8%). The top bin, 90% to 100%, said 95.8% and was right 97.2%, so very confident guesses
 can be trusted. So the percentages are mostly honest and slightly modest in the middle, and I
 wouldn't call them exact odds.
+
+**Checking how much luck moves the score:** earlier I wrote that luck alone moves a score by about
+0.3 points, but that was a guess and I hadn't measured it. clip_bootstrap_best.py measures it. It
+picks 21,100 photos at random from the test photos, with repeats allowed, scores a setup on that
+pick, and does this 1000 times. The middle 95% of those scores is the range. Both setups are scored
+on the same picks each time, so the gap between them is fair.
+
+Both full-test scores came back as before (40.4% for OpenAI's ViT-L-14 alone and 43.5% for the best
+setup). Over the 1000 resamples, OpenAI's ViT-L-14 alone ranged from 39.7% to 41.1% top 1, and the
+best setup ranged from 42.8% to 44.2%. The gap between them ranged from 2.62 to 3.51 points, and the
+best setup scored higher than OpenAI alone in 100.0% of the resamples. So my 0.3 guess was too
+small. Luck moves one score by about 0.7 points either way, and the best setup is still clearly
+ahead of OpenAI's ViT-L-14 alone. I haven't run this on the smaller steps, so I can't say whether
+joining on its own (1.9 points) or adding the sentences (1.2 points) would hold up. The run took 1
+minute 36.40 seconds, which includes downloading the 1.71GB OpenAI weights again.
+
+**Next real step:** check that no photo shows up in more than one of the train, valid and test
+splits.
 
 ## Try it on your own photo
 
