@@ -586,8 +586,19 @@ ahead of OpenAI's ViT-L-14 alone. I haven't run this on the smaller steps, so I 
 joining on its own (1.9 points) or adding the sentences (1.2 points) would hold up. The run took 1
 minute 36.40 seconds, which includes downloading the 1.71GB OpenAI weights again.
 
-**Next real step:** check that no photo shows up in more than one of the train, valid and test
-splits.
+**Checking the splits don't share photos:** a test photo that was also in the training photos would
+make the test scores look better than they are. check_split_overlap.py reads every photo in the
+train, valid and test splits, makes a short fingerprint of each file's bytes (a SHA-256 hash), and
+looks for the same fingerprint in more than one split, or twice inside one split.
+
+It found 0 fingerprints that appear in more than one split, and 0 repeated photos inside train,
+valid or test. This only catches files that are identical byte for byte. A resized or re-saved copy
+of the same picture would get a different fingerprint and slip through, so it rules out exact copies
+and nothing more. It also says nothing about whether CLIP's own training data had any of these
+photos in it. The run took 24.276 seconds.
+
+**Next real step:** see how the best setup's score changes when it only learns from a share of the
+training photos, 10%, 25% and 50%, with five different random picks of photos each time.
 
 ## Try it on your own photo
 
