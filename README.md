@@ -597,8 +597,21 @@ of the same picture would get a different fingerprint and slip through, so it ru
 and nothing more. It also says nothing about whether CLIP's own training data had any of these
 photos in it. The run took 24.276 seconds.
 
-**Next real step:** see how the best setup's score changes when it only learns from a share of the
-training photos, 10%, 25% and 50%, with five different random picks of photos each time.
+**Checking how much the training photos matter:** clip_training_size_best.py trains the best setup
+(the joined classifier with the sentences blended in at 0.2) on a share of each country's training
+photos, then scores all 21,100 test photos. Each share is picked 5 times with different random
+seeds, so I can see how much it matters which photos get picked. I kept C at 10.0 and did not pick
+it again for the smaller shares.
+
+Top 1 averaged 32.7% with 10% of the training photos (lowest 32.4%, highest 33.2%), 37.8% with 25%
+(37.5% to 38.0%) and 40.6% with 50% (40.2% to 41.0%). With all of them it was 43.5%, from one run
+since there is nothing to pick. The five picks landed within 0.8 points of each other at every
+share. Going from 50% to all of the photos added 2.9 points, almost as much as going from 25% to 50%
+(2.8 points), so the curve had not flattened out by the end. Country211 only has 150 training photos
+per country, so I can't test with more. The run took 53.299 seconds.
+
+**Next real step:** see how accurate the best setup is when it only answers the photos it is most
+confident about.
 
 ## Try it on your own photo
 
