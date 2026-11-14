@@ -610,8 +610,28 @@ share. Going from 50% to all of the photos added 2.9 points, almost as much as g
 (2.8 points), so the curve had not flattened out by the end. Country211 only has 150 training photos
 per country, so I can't test with more. The run took 53.299 seconds.
 
-**Next real step:** see how accurate the best setup is when it only answers the photos it is most
-confident about.
+**Answering only when it's confident:** clip_coverage_best.py keeps only the test photos where the
+best setup was most sure of its top guess (the highest probability it gave any country) and measures
+how often that top guess is right on just those. The share kept is the coverage. With all 21,100
+photos it was right 43.5% of the time, which matched the earlier runs.
+
+| Share kept | Photos | Lowest confidence kept | Top 1 right |
+|---|---|---|---|
+| 100% | 21,100 | 2.4% | 43.5% |
+| 80% | 16,880 | 15.3% | 51.9% |
+| 60% | 12,660 | 26.0% | 62.5% |
+| 50% | 10,550 | 32.7% | 68.6% |
+| 40% | 8,440 | 41.3% | 75.2% |
+| 20% | 4,220 | 68.8% | 91.2% |
+| 10% | 2,110 | 87.3% | 97.0% |
+
+So the more confident the setup is, the more often it is right, and the 10% it is surest about it
+gets right 97.0% of the time. The catch is that answering only those leaves 90% of the photos
+unanswered. The run took 7 minutes 22.69 seconds, but most of that was downloading the 1.71GB OpenAI
+weights again, so it is not how long the script itself takes.
+
+**Next real step:** look at the wrong guesses the best setup was most sure about, with the photo
+files, to see what kind of mistakes they are.
 
 ## Try it on your own photo
 
