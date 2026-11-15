@@ -630,8 +630,30 @@ gets right 97.0% of the time. The catch is that answering only those leaves 90% 
 unanswered. The run took 7 minutes 22.69 seconds, but most of that was downloading the 1.71GB OpenAI
 weights again, so it is not how long the script itself takes.
 
-**Next real step:** look at the wrong guesses the best setup was most sure about, with the photo
-files, to see what kind of mistakes they are.
+**Looking at the confident mistakes:** clip_confident_mistakes_best.py lists the test photos the
+best setup got wrong while being most sure of itself, and counts how many wrong guesses sit above
+each confidence level. The top 1 score was 43.5% again, which matched the earlier runs.
+
+The 20 most confident wrong guesses were all at 92.7% or higher, the top one at 98.3% (a Spanish
+photo guessed as Portugal). By my own reading of a map, 14 of the 20 guessed a country next to the
+real one, for example Sudan as South Sudan (twice), Thailand as Laos or Cambodia, Zambia as
+Zimbabwe, San Marino as Italy and Italy as Holy See. The other 6 were further off, such as Bulgaria
+as Andorra, Poland as Luxembourg and Azerbaijan as Macao. I have not opened the photos yet, so I
+can't say why it was so sure.
+
+| Confidence at least | Wrong | Photos |
+|---|---|---|
+| 90% | 44 | 1,779 |
+| 70% | 333 | 4,082 |
+| 50% | 1,308 | 6,822 |
+
+So high confidence does not rule out mistakes: 44 photos were wrong even at 90% or more. Among the
+100 most confident mistakes no pair of countries came up often. The most common was Israel guessed
+as Palestine, 3 times, then Zambia as Zimbabwe, Uganda as Rwanda, India as Bangladesh and Sudan as
+South Sudan, 2 times each. The run took 19.421 seconds.
+
+**Next real step:** put each of the 211 countries into a continent, so a later step can check
+whether the mistakes tend to stay on the right continent.
 
 ## Try it on your own photo
 
