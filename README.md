@@ -652,8 +652,26 @@ So high confidence does not rule out mistakes: 44 photos were wrong even at 90% 
 as Palestine, 3 times, then Zambia as Zimbabwe, Uganda as Rwanda, India as Bangladesh and Sudan as
 South Sudan, 2 times each. The run took 19.421 seconds.
 
-**Next real step:** put each of the 211 countries into a continent, so a later step can check
-whether the mistakes tend to stay on the right continent.
+**Putting the countries into continents:** continents.py is a table that gives each country code a
+continent, and check_continents.py checks it against the 211 country folders in Country211. Every
+one of the 211 folders is in the table. The table also has 39 countries that Country211 doesn't use,
+which I left in.
+
+| Continent | Countries in Country211 |
+|---|---|
+| Europe | 52 |
+| Asia | 51 |
+| Africa | 44 |
+| North America | 36 |
+| South America | 13 |
+| Oceania | 13 |
+| Antarctica | 2 |
+
+That adds up to 211. A few countries sit on two continents, Russia and Turkey for example, so where
+they go was my own call, and the later continent numbers depend on those choices. The check took
+13.028 seconds.
+
+**Next real step:** see how often the best setup's top guess is at least on the right continent.
 
 ## Try it on your own photo
 
