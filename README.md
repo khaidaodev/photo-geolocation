@@ -671,7 +671,29 @@ That adds up to 211. A few countries sit on two continents, Russia and Turkey fo
 they go was my own call, and the later continent numbers depend on those choices. The check took
 13.028 seconds.
 
-**Next real step:** see how often the best setup's top guess is at least on the right continent.
+**Checking the continent:** clip_continents_best.py takes the best setup's top guess for each test
+photo and checks whether the guessed country is on the same continent as the real one, using the
+continent table. The top 1 score was 43.5% again, which matched the earlier runs. The right
+continent came out at 77.0%, and 59.4% of the wrong country guesses were still on the right
+continent.
+
+| Real continent | Photos | Right country | Right continent |
+|---|---|---|---|
+| Europe | 5,200 | 40.8% | 84.2% |
+| Asia | 5,100 | 49.8% | 78.7% |
+| Africa | 4,400 | 43.1% | 78.0% |
+| North America | 3,600 | 38.7% | 75.7% |
+| South America | 1,300 | 37.8% | 55.7% |
+| Oceania | 1,300 | 45.3% | 63.3% |
+| Antarctica | 200 | 70.5% | 75.5% |
+
+South America had the lowest right continent score, 55.7%, and Europe the highest, 84.2%. I haven't
+looked into why. Antarctica has only 200 photos, so its numbers move a lot with a few photos, and
+where a country sits in my continent table changes these scores, so I wouldn't read much into small
+gaps. The run took 34.472 seconds, which included downloading the 1.71GB OpenAI weights again.
+
+**Next real step:** count which continents get mixed up with which, by showing for each real
+continent where its wrong continent guesses went.
 
 ## Try it on your own photo
 
