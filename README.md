@@ -692,8 +692,27 @@ looked into why. Antarctica has only 200 photos, so its numbers move a lot with 
 where a country sits in my continent table changes these scores, so I wouldn't read much into small
 gaps. The run took 34.472 seconds, which included downloading the 1.71GB OpenAI weights again.
 
-**Next real step:** count which continents get mixed up with which, by showing for each real
-continent where its wrong continent guesses went.
+**Which continents get mixed up:** clip_continent_confusion_best.py counts, for the photos from each
+real continent, which continent the best setup's top guess landed on. Each row below is a real
+continent and adds up to about 100%, and each column is the continent it guessed. The top 1 score
+was 43.5% again, which matched the earlier runs.
+
+| Real continent | Africa | Asia | Europe | North America | South America | Oceania | Antarctica |
+|---|---|---|---|---|---|---|---|
+| Africa | 78.0% | 6.9% | 3.3% | 6.1% | 3.2% | 2.5% | 0.1% |
+| Asia | 6.3% | 78.7% | 6.8% | 4.1% | 2.0% | 2.0% | 0.1% |
+| Europe | 2.6% | 7.1% | 84.2% | 2.9% | 2.2% | 0.8% | 0.3% |
+| North America | 5.6% | 4.8% | 4.9% | 75.7% | 4.6% | 4.2% | 0.2% |
+| South America | 7.3% | 8.0% | 9.1% | 15.7% | 55.7% | 2.8% | 1.5% |
+| Oceania | 5.8% | 7.1% | 3.7% | 16.9% | 2.8% | 63.3% | 0.5% |
+| Antarctica | 1.0% | 0.5% | 9.0% | 4.5% | 8.0% | 1.5% | 75.5% |
+
+The diagonal matches the right continent scores from the last step. The two biggest mix-ups were
+Oceania photos guessed as North America (16.9%) and South America photos guessed as North America
+(15.7%). I haven't looked into why. The run took 43.018 seconds.
+
+**Next real step:** see whether blending the sentences in helps every continent or only some, by
+scoring the classifier alone, the sentences alone and the blend on each continent.
 
 ## Try it on your own photo
 
