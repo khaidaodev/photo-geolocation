@@ -711,8 +711,31 @@ The diagonal matches the right continent scores from the last step. The two bigg
 Oceania photos guessed as North America (16.9%) and South America photos guessed as North America
 (15.7%). I haven't looked into why. The run took 43.018 seconds.
 
-**Next real step:** see whether blending the sentences in helps every continent or only some, by
-scoring the classifier alone, the sentences alone and the blend on each continent.
+**Does blending help every continent:** clip_blend_by_continent_best.py scores the classifier alone,
+the country sentences alone and the blend (sentences at 0.2) separately on the test photos from each
+real continent. Across all 21,100 test photos it gave 42.3% for the classifier, 29.5% for the
+sentences and 43.5% for the blend, which matched the earlier runs.
+
+| Real continent | Photos | Classifier alone | Sentences alone | Blend |
+|---|---|---|---|---|
+| Europe | 5,200 | 39.5% | 32.2% | 40.8% |
+| Asia | 5,100 | 48.9% | 37.9% | 49.8% |
+| Africa | 4,400 | 41.7% | 26.0% | 43.1% |
+| North America | 3,600 | 36.8% | 21.5% | 38.7% |
+| Oceania | 1,300 | 44.5% | 26.5% | 45.3% |
+| South America | 1,300 | 37.5% | 22.4% | 37.8% |
+| Antarctica | 200 | 71.5% | 29.0% | 70.5% |
+
+The blend scored higher than the classifier alone on 6 of the 7 continents. Going by the rounded
+numbers, the gain was biggest for North America (about 1.9 points) and Africa (about 1.4) and
+smallest for South America (about 0.3). Antarctica went the other way, down about 1.0 point, but it
+only has 200 photos. The sentences alone were the weakest everywhere. I haven't measured how much
+luck moves these per continent scores, and the smaller continents have few photos, so I wouldn't
+read much into the small gaps. The run took 1 minute 29.62 seconds, which included downloading the
+1.71GB OpenAI weights again.
+
+**Next real step:** write HOW_IT_WORKS.md, a plain walkthrough of how the whole thing works, from
+the photo to the guess.
 
 ## Try it on your own photo
 
