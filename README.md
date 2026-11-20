@@ -734,8 +734,13 @@ luck moves these per continent scores, and the smaller continents have few photo
 read much into the small gaps. The run took 1 minute 29.62 seconds, which included downloading the
 1.71GB OpenAI weights again.
 
-**Next real step:** write HOW_IT_WORKS.md, a plain walkthrough of how the whole thing works, from
-the photo to the guess.
+**A plain walkthrough:** HOW_IT_WORKS.md explains the whole setup in plain words, from the photo to
+the guess, using only numbers from the runs above. It also says where the test photos were used to
+compare setups, so the best score has had a small push from that choice that I haven't measured.
+
+**Next real step:** see whether letting the closest training photos vote, with the number of voters
+picked on the valid photos, does better than the classifier on the best setup's joined photo
+numbers.
 
 ## Try it on your own photo
 
