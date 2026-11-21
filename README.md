@@ -738,9 +738,27 @@ read much into the small gaps. The run took 1 minute 29.62 seconds, which includ
 the guess, using only numbers from the runs above. It also says where the test photos were used to
 compare setups, so the best score has had a small push from that choice that I haven't measured.
 
-**Next real step:** see whether letting the closest training photos vote, with the number of voters
-picked on the valid photos, does better than the classifier on the best setup's joined photo
-numbers.
+**Letting the closest photos vote:** clip_knn_best.py skips the classifier. For each photo it finds
+the closest training photos, using the best setup's joined photo numbers, and the country that most
+of them come from is the guess. I tried 1, 5, 10, 20 and 50 voters and picked the number on the
+valid photos only, then read the test photos once.
+
+| Voters | Valid top 1 |
+|---|---|
+| 1 | 31.2% |
+| 5 | 32.0% |
+| 10 | 31.9% |
+| 20 | 30.6% |
+| 50 | 28.7% |
+
+5 voters won on valid. On the test photos that gave 32.1% top 1, 44.4% top 3 and 49.4% top 5. The
+best setup got 43.5%, 61.9% and 69.4%, so the vote was 11.4, 17.5 and 20.0 points lower. The
+classifier is clearly better than letting the closest photos vote. The scores for 5 and 10 voters
+were within 0.1 points on valid, so I wouldn't read anything into 5 over 10. The run took 29.942
+seconds.
+
+**Next real step:** check that every country really has 150 train, 50 valid and 100 test photos, by
+counting the photos in each folder.
 
 ## Try it on your own photo
 
