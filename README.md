@@ -757,8 +757,24 @@ classifier is clearly better than letting the closest photos vote. The scores fo
 were within 0.1 points on valid, so I wouldn't read anything into 5 over 10. The run took 29.942
 seconds.
 
-**Next real step:** check that every country really has 150 train, 50 valid and 100 test photos, by
-counting the photos in each folder.
+**Checking the splits are balanced:** check_balance.py counts the photos in every country folder of
+each split and lists any country that has a different count from the rest. I wanted to be sure each
+country really has the same number of photos before leaning on the scores, because an uneven split
+would make a country look easier or harder.
+
+| Split | Countries | Photos per country | Photos in total | Uneven countries |
+|---|---|---|---|---|
+| Train | 211 | 150 | 31,650 | none |
+| Valid | 211 | 50 | 10,550 | none |
+| Test | 211 | 100 | 21,100 | none |
+
+Every country has exactly the same number of photos within each split, so the split sizes I've been
+quoting are right and no country gets more weight because it has more photos. It only counts the
+files in the folders. It doesn't say anything about whether the photos are good ones. The check took
+1.768 seconds.
+
+**Next real step:** see how far down the best setup's list the right country sits when it isn't the
+top guess.
 
 ## Try it on your own photo
 
