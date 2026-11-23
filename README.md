@@ -773,8 +773,25 @@ quoting are right and no country gets more weight because it has more photos. It
 files in the folders. It doesn't say anything about whether the photos are good ones. The check took
 1.768 seconds.
 
-**Next real step:** see how far down the best setup's list the right country sits when it isn't the
-top guess.
+**How far down the list the right country sits:** clip_ranks_best.py ranks all 211 countries for
+each test photo, best guess first, and finds where the real country landed. The top 1, 3 and 5
+scores are the ones from the earlier runs, and it also checks further down the list.
+
+| Right country inside the top | Share of test photos |
+|---|---|
+| 1 | 43.5% |
+| 3 | 61.9% |
+| 5 | 69.4% |
+| 10 | 78.5% |
+| 20 | 86.3% |
+| 50 | 94.1% |
+
+The median rank of the real country was 2 out of 211, so for at least half the photos it was in the
+top 2 guesses. For 5.9% of photos it was still outside the top 50. I haven't looked at which photos
+those are. The run took 44.627 seconds.
+
+**Next real step:** run the best setup's training and scoring a second time and check it gives
+exactly the same guesses.
 
 ## Try it on your own photo
 
