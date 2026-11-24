@@ -790,8 +790,25 @@ The median rank of the real country was 2 out of 211, so for at least half the p
 top 2 guesses. For 5.9% of photos it was still outside the top 50. I haven't looked at which photos
 those are. The run took 44.627 seconds.
 
-**Next real step:** run the best setup's training and scoring a second time and check it gives
-exactly the same guesses.
+**Checking it gives the same answer twice:** check_repeatable.py trains the best setup twice in a
+row on the saved photo numbers (C=10.0, sentences blended in), scores the test photos each time and
+compares the two sets of guesses. If the two runs disagreed, the small differences between setups
+would be harder to trust.
+
+| Check | Result |
+|---|---|
+| Top 1, run 1 | 43.5% |
+| Top 1, run 2 | 43.5% |
+| Photos where both runs pick the same country | 100.0% |
+| Biggest difference between any two scores | 0.00e+00 |
+
+The two runs gave identical guesses, so on my laptop training the best setup gave the same answer
+both times. That only tells me about my own laptop, and I haven't tried a different machine or a
+different version of the libraries. It also only covers training on the saved photo numbers. The
+saved numbers themselves are checked in the next step. The run took 31.793 seconds.
+
+**Next real step:** run CLIP again on every 200th photo and check the new numbers match the saved
+photo numbers.
 
 ## Try it on your own photo
 
