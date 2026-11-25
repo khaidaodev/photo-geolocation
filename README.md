@@ -807,8 +807,24 @@ both times. That only tells me about my own laptop, and I haven't tried a differ
 different version of the libraries. It also only covers training on the saved photo numbers. The
 saved numbers themselves are checked in the next step. The run took 31.793 seconds.
 
-**Next real step:** run CLIP again on every 200th photo and check the new numbers match the saved
-photo numbers.
+**Checking the saved photo numbers:** every CLIP score so far rests on photo numbers I saved once
+and reused, so check_features_again.py takes every 200th test photo, which came to 106 photos, runs
+it through the OpenAI ViT-L-14 model again and compares the new numbers with the saved ones.
+
+| Check | Result |
+|---|---|
+| Photos re-checked | 106 |
+| Labels match the saved ones | True |
+| Biggest difference between any two numbers | 0.00e+00 |
+| Lowest cosine similarity | 1.000000 |
+
+The new numbers were identical to the saved ones for those 106 photos. That covers the OpenAI
+ViT-L-14 numbers for a sample of the test photos, on my laptop. I did not re-check the DFN-2B
+numbers, the train and valid photos or the other test photos, so it is a spot check and not proof
+that every saved number is right. The run took 26.609 seconds.
+
+**Next real step:** work out exactly what pure guessing would score at top 1, 3 and 5 across 211
+countries, to put next to the best setup's scores.
 
 ## Try it on your own photo
 
