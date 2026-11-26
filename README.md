@@ -823,8 +823,23 @@ ViT-L-14 numbers for a sample of the test photos, on my laptop. I did not re-che
 numbers, the train and valid photos or the other test photos, so it is a spot check and not proof
 that every saved number is right. The run took 26.609 seconds.
 
-**Next real step:** work out exactly what pure guessing would score at top 1, 3 and 5 across 211
-countries, to put next to the best setup's scores.
+**What pure guessing would score:** chance_baseline.py works out what a guesser that knows nothing
+would get across 211 countries, which is the number of guesses allowed divided by 211. That is fair
+here because every country has the same number of photos in the test split (the balance check
+above), so no country is easier to guess by luck.
+
+| Guesses allowed | Pure guessing | Best setup | Best setup compared with guessing |
+|---|---|---|---|
+| Top 1 | 0.47% | 43.5% | 91.8 times |
+| Top 3 | 1.42% | 61.9% | 43.5 times |
+| Top 5 | 2.37% | 69.4% | 29.3 times |
+
+So the best setup is far above chance, and the times-better number shrinks as more guesses are
+allowed, because guessing gets easier too. Earlier in this README I rounded these chance numbers to
+0.5% and 1.4%. The check took 0.019 seconds.
+
+**Next real step:** compare the best setup's score on the valid photos with its score on the test
+photos, to see how big the gap is.
 
 ## Try it on your own photo
 
