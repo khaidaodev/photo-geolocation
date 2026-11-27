@@ -838,8 +838,25 @@ So the best setup is far above chance, and the times-better number shrinks as mo
 allowed, because guessing gets easier too. Earlier in this README I rounded these chance numbers to
 0.5% and 1.4%. The check took 0.019 seconds.
 
-**Next real step:** compare the best setup's score on the valid photos with its score on the test
-photos, to see how big the gap is.
+**Valid score against test score:** clip_valid_vs_test_best.py scores the best setup on the 10,550
+valid photos and on the 21,100 test photos and shows the gap. I picked C and the sentence weight on
+the valid photos, so I'd expect the valid score to be the same or a bit higher.
+
+| Guesses allowed | Valid | Test | Test minus valid |
+|---|---|---|---|
+| Top 1 | 44.5% | 43.5% | -1.0 points |
+| Top 3 | 62.1% | 61.9% | -0.2 points |
+| Top 5 | 69.5% | 69.4% | -0.1 points |
+
+The test scores came out a little lower than the valid ones, by 1.0 point at top 1 and almost
+nothing at top 3 and top 5. The test score is not higher than the valid score, so there is no sign
+here that comparing setups on the test photos made the test score look better. I haven't measured
+how much of the 1.0 point is the settings being picked on valid and how much is luck, and the valid
+split has half as many photos as the test split, so its own luck range is wider than the test range
+I measured earlier. The run took 22.336 seconds.
+
+**Next real step:** look at which countries the sentence blend helps most and which it hurts, one
+country at a time.
 
 ## Try it on your own photo
 
