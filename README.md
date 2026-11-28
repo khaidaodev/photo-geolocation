@@ -855,8 +855,41 @@ how much of the 1.0 point is the settings being picked on valid and how much is 
 split has half as many photos as the test split, so its own luck range is wider than the test range
 I measured earlier. The run took 22.336 seconds.
 
-**Next real step:** look at which countries the sentence blend helps most and which it hurts, one
-country at a time.
+**Which countries the sentences help and hurt:** clip_blend_by_country_best.py scores each of the
+211 countries with the classifier alone and with the sentences blended in, and counts how many of
+its 100 test photos changed. Overall it was 42.3% without the sentences and 43.5% with them. The
+blend helped 134 countries, hurt 60 and left 17 unchanged.
+
+| Biggest gains | Right without | Right with | Photos gained |
+|---|---|---|---|
+| Bonaire, Sint Eustatius and Saba | 33% | 44% | +11 |
+| Burkina Faso | 39% | 47% | +8 |
+| Senegal | 35% | 43% | +8 |
+| Antigua and Barbuda | 38% | 45% | +7 |
+| Bosnia and Herzegovina | 35% | 42% | +7 |
+| Japan | 64% | 71% | +7 |
+| Namibia | 40% | 47% | +7 |
+| Svalbard and Jan Mayen | 65% | 72% | +7 |
+
+| Biggest losses | Right without | Right with | Photos lost |
+|---|---|---|---|
+| Kosovo | 36% | 18% | -18 |
+| Yemen | 60% | 51% | -9 |
+| Georgia | 37% | 29% | -8 |
+| Virgin Islands, British | 33% | 26% | -7 |
+| French Polynesia | 40% | 33% | -7 |
+| Papua New Guinea | 44% | 38% | -6 |
+| Falkland Islands (Malvinas) | 70% | 64% | -6 |
+| Zimbabwe | 36% | 31% | -5 |
+
+Each country has only 100 test photos, so a change of a few photos could be luck. Kosovo stands out,
+losing 18 of its 100 photos, far more than any other country. The script's output shows Kosovo as
+XK, because the package I use to turn country codes into names has no name for it, so my guess is
+that its sentence says "a photo taken in XK", which CLIP can't make sense of. I haven't tested that
+yet. The run took 23.373 seconds.
+
+**Next real step:** give Kosovo its proper name in the sentences and see whether its score recovers
+and whether anything else changes.
 
 ## Try it on your own photo
 
